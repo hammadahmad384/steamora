@@ -1,0 +1,6 @@
+{
+  "name": "STEAMORA | Premium Steam Cleaning Melbourne",
+  "description": "Melbourne's premier steam cleaning service for carpets, couches, mattresses, blinds, and rugs. Fresh Spaces. Elevated Living.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
