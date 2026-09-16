@@ -11,7 +11,8 @@ export const SERVICES: ServiceDetail[] = [
     icon: 'Sparkles',
     startingPrice: '$30 - $35 Per Room',
     badge: 'Most Popular',
-    bannerImage: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?q=80&w=1200&auto=format&fit=crop',
+    bannerImage: '/images/carpet-cleaning.webp',
+    bannerAlt: 'Professional carpet steam cleaning service in Melbourne',
     beforeImage: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop',
     afterImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop',
     overview: 'Our carpet cleaning service employs high-temperature steam extraction that penetrates deep into carpet piles, sanitising fibers and eliminating bacteria without any additional chemical treatments.',
@@ -52,7 +53,8 @@ export const SERVICES: ServiceDetail[] = [
     icon: 'Bed',
     startingPrice: '$80 - $100',
     badge: 'Hygienic',
-    bannerImage: 'https://images.unsplash.com/photo-1631679706909-1844bbd07221?q=80&w=1200&auto=format&fit=crop',
+    bannerImage: '/images/mattress-cleaning.webp',
+    bannerAlt: 'Professional mattress cleaning service in Melbourne',
     beforeImage: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop',
     afterImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop',
     overview: 'Mattresses harbor millions of dust mites and allergens. Our deep extraction method purifies your mattress completely.',
@@ -83,16 +85,17 @@ export const SERVICES: ServiceDetail[] = [
     ]
   },
   {
-    id: 'couch-cleaning',
+    id: 'sofa-cleaning',
     title: 'Couch Cleaning',
     shortTitle: 'Couch Cleaning',
-    slug: 'couch-cleaning',
+    slug: 'sofa-cleaning',
     tagline: 'Revitalize your couch and sofas',
     heroDescription: 'Safely lift dirt, body oils, and food spills from your couch. We restore vibrant texture without fabric shrinkage.',
     icon: 'Armchair',
     startingPrice: '$25 - $35 Per Seat',
     badge: 'Fabric Safe',
-    bannerImage: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=1200&auto=format&fit=crop',
+    bannerImage: '/images/couch-cleaning.webp',
+    bannerAlt: 'Professional couch cleaning service in Melbourne',
     beforeImage: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?q=80&w=1000&auto=format&fit=crop',
     afterImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1000&auto=format&fit=crop',
     overview: 'Using gentle moisture-controlled extraction, our specialists treat delicate linens, cotton blends, and synthetic couches.',
@@ -130,7 +133,8 @@ export const SERVICES: ServiceDetail[] = [
     icon: 'Maximize',
     startingPrice: '$25 - $35',
     badge: 'Detail Focused',
-    bannerImage: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=1200&auto=format&fit=crop',
+    bannerImage: '/images/blind-cleaning.webp',
+    bannerAlt: 'Professional blind cleaning service in Melbourne',
     beforeImage: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop',
     afterImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop',
     overview: 'Blinds are magnets for dust. Our meticulous cleaning process ensures every slat is perfectly clean.',
@@ -169,6 +173,7 @@ export const SERVICES: ServiceDetail[] = [
     startingPrice: '$80 - $100',
     badge: 'Premium Care',
     bannerImage: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200&auto=format&fit=crop',
+    bannerAlt: 'Professional rug cleaning service in Melbourne by STEAMORA',
     beforeImage: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop',
     afterImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop',
     overview: 'Rugs require special attention. We carefully clean them to remove deep-seated dirt while protecting the fibers.',
@@ -191,6 +196,46 @@ export const SERVICES: ServiceDetail[] = [
       {
         name: 'Standard Rug',
         price: '$80 - $100',
+        description: 'Depending on size and material.',
+        items: ['Deep Cleaning', 'Fiber Protection']
+      }
+    ]
+  }
+  ,
+  {
+    id: 'upholstery-cleaning',
+    title: 'Upholstery Cleaning',
+    shortTitle: 'Upholstery Cleaning',
+    slug: 'upholstery-cleaning',
+    tagline: 'Expert care for your upholstery',
+    heroDescription: 'Delicate yet effective cleaning for all types of upholstery, preserving their vibrant colors and intricate patterns.',
+    icon: 'Sofa',
+    startingPrice: '$25 - $35 Per Seat',
+    badge: 'Premium Care',
+    bannerImage: '/images/upholstery-cleaning.webp',
+    bannerAlt: 'Professional upholstery cleaning service in Melbourne',
+    beforeImage: 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?q=80&w=1000&auto=format&fit=crop',
+    afterImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1000&auto=format&fit=crop',
+    overview: 'Upholstery requires special attention. We carefully clean them to remove deep-seated dirt while protecting the fibers.',
+    features: [
+      'Safe for most fabric types',
+      'Deep dirt extraction',
+      'Color preservation'
+    ],
+    processSteps: [
+      { step: 1, title: 'Inspection', description: 'Checking for colorfastness.' },
+      { step: 2, title: 'Cleaning', description: 'Tailored steam or dry cleaning.' }
+    ],
+    benefits: [
+      { title: 'Restores Beauty', description: 'Brings back the original vibrancy.' }
+    ],
+    faq: [
+      { question: 'Can you clean velvet upholstery?', answer: 'Yes, we assess each fabric to determine the safest method.' }
+    ],
+    pricingTiers: [
+      {
+        name: 'Standard Seat',
+        price: '$25 - $35',
         description: 'Depending on size and material.',
         items: ['Deep Cleaning', 'Fiber Protection']
       }

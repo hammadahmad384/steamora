@@ -13,8 +13,8 @@ export interface PageSeoConfig {
   canonicalPath?: string;
 }
 
-const BASE_URL = 'https://steamora.com.au';
-const BRAND_SUFFIX = ' | STEAMORA Melbourne';
+const BASE_URL = 'https://steamoracleaning.com.au';
+const BRAND_SUFFIX = ' | STEAMORA Cleaning';
 
 /**
  * Resolves SEO metadata (title, description, OG tags) dynamically based on the current page route and parameters.
@@ -23,8 +23,8 @@ export function getPageSeo(route: PageRoute, param?: string): PageSeoConfig {
   switch (route) {
     case 'home':
       return {
-        title: `STEAMORA | Premium Steam Cleaning Melbourne | Carpets, Couches & Mattresses`,
-        description: `Melbourne's premier steam cleaning specialists. Carpet cleaning ($30–$35/room), couches ($25–$35/seat), mattresses ($80–$100), blinds & rugs. Rapid dry, eco-safe, 100% bond-back guarantee.`,
+        title: `STEAMORA Cleaning | Professional Cleaning Services in Melbourne`,
+        description: `Professional cleaning services in Melbourne from STEAMORA Cleaning. Explore sofa, carpet, upholstery, mattress and blind cleaning services. Request a free quote.`,
         keywords: 'steam cleaning melbourne, carpet steam cleaning, couch cleaning melbourne, mattress sanitisation, end of lease carpet cleaning',
         canonicalPath: '/'
       };
@@ -45,31 +45,52 @@ export function getPageSeo(route: PageRoute, param?: string): PageSeoConfig {
         canonicalPath: '/services'
       };
 
+
     case 'service-carpet':
-    case 'service-couch':
-    case 'service-mattress':
-    case 'service-blind':
-    case 'service-rug': {
-      // Map route or param to service detail
-      const serviceIdMap: Record<string, string> = {
-        'service-carpet': 'carpet-cleaning',
-        'service-couch': 'couch-cleaning',
-        'service-mattress': 'mattress-cleaning',
-        'service-blind': 'blind-cleaning',
-        'service-rug': 'rug-cleaning',
-      };
-
-      const targetSlug = serviceIdMap[route] || param || 'carpet-cleaning';
-      const service = SERVICES.find(s => s.id === targetSlug || s.slug === targetSlug) || SERVICES[0];
-
       return {
-        title: `${service.title} Melbourne (${service.startingPrice})${BRAND_SUFFIX}`,
-        description: `${service.heroDescription} Professional ${service.shortTitle.toLowerCase()} across Melbourne. Rapid dry, non-toxic solutions, real estate approved receipts.`,
-        keywords: `${service.shortTitle.toLowerCase()} melbourne, ${service.title.toLowerCase()}, steam clean ${service.shortTitle.toLowerCase()}, best ${service.shortTitle.toLowerCase()} melbourne`,
-        canonicalPath: `/services/${service.slug}`
+        title: 'Carpet Cleaning Melbourne | STEAMORA Cleaning',
+        description: 'Professional carpet cleaning in Melbourne from STEAMORA Cleaning. Refresh carpets and remove built-up dirt and stains. Request a free quote.',
+        keywords: 'carpet cleaning melbourne, professional carpet cleaning, steam cleaning carpets',
+        canonicalPath: '/carpet-cleaning'
+      };
+    case 'service-sofa':
+      return {
+        title: 'Sofa Cleaning Melbourne | STEAMORA Cleaning',
+        description: 'Professional sofa cleaning in Melbourne. Refresh your sofa and couch with professional cleaning from STEAMORA Cleaning. Request a free quote.',
+        keywords: 'sofa cleaning melbourne, couch cleaning melbourne, upholstery cleaning, professional sofa clean',
+        canonicalPath: '/sofa-cleaning'
+      };
+    case 'service-mattress':
+      return {
+        title: 'Mattress Cleaning Melbourne | STEAMORA Cleaning',
+        description: 'Professional mattress cleaning in Melbourne from STEAMORA Cleaning. Refresh your mattress with professional cleaning. Request a free quote.',
+        keywords: 'mattress cleaning melbourne, professional mattress cleaning, clean mattress',
+        canonicalPath: '/mattress-cleaning'
+      };
+    case 'service-upholstery':
+      return {
+        title: 'Upholstery Cleaning Melbourne | STEAMORA Cleaning',
+        description: 'Professional upholstery cleaning in Melbourne from STEAMORA Cleaning. Refresh upholstered furniture with professional cleaning. Request a free quote.',
+        keywords: 'upholstery cleaning melbourne, fabric cleaning, professional upholstery cleaners',
+        canonicalPath: '/upholstery-cleaning'
+      };
+    case 'service-blind':
+      return {
+        title: 'Blind Cleaning Melbourne | STEAMORA Cleaning',
+        description: 'Professional blind cleaning in Melbourne from STEAMORA Cleaning. Remove accumulated dust and dirt and refresh your blinds. Request a free quote.',
+        keywords: 'blind cleaning melbourne, window blind cleaners, professional blind cleaning',
+        canonicalPath: '/blind-cleaning'
+      };
+    case 'service-rug': {
+      const targetSlug = 'rug-cleaning';
+      const service = SERVICES.find(s => s.id === targetSlug) || SERVICES[0];
+      return {
+        title: `${service.title} Melbourne | STEAMORA Cleaning`,
+        description: `Professional ${service.shortTitle.toLowerCase()} in Melbourne. ${service.tagline}. Request a free quote.`,
+        keywords: `${service.shortTitle.toLowerCase()} melbourne, ${service.title.toLowerCase()}, steam clean ${service.shortTitle.toLowerCase()}`,
+        canonicalPath: `/rug-cleaning`
       };
     }
-
     case 'service-areas':
       return {
         title: `Service Areas Across Greater Melbourne${BRAND_SUFFIX}`,
@@ -191,6 +212,55 @@ function setCanonicalUrl(canonicalPath: string) {
   link.setAttribute('href', url);
 }
 
+
+/**
+ * Helper to update or create the JSON-LD structured data script.
+ */
+function setStructuredData(schema: object) {
+  if (typeof document === 'undefined') return;
+  let script = document.querySelector('script[type="application/ld+json"]') as HTMLScriptElement | null;
+  if (!script) {
+    script = document.createElement('script');
+    script.setAttribute('type', 'application/ld+json');
+    document.head.appendChild(script);
+  }
+  script.textContent = JSON.stringify(schema);
+}
+
+const generateBaseSchema = () => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CleaningService",
+    "name": "STEAMORA Cleaning",
+    "image": "https://steamoracleaning.com.au/android-chrome-512x512.png",
+    "url": "https://steamoracleaning.com.au",
+    "telephone": "0426 000 000",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Melbourne",
+      "addressRegion": "VIC",
+      "addressCountry": "AU"
+    }
+  };
+};
+
+const generateServiceSchema = (serviceName: string, serviceUrl: string, description: string) => {
+  const base = generateBaseSchema();
+  return {
+    ...base,
+    "service": {
+      "@type": "Service",
+      "serviceType": serviceName,
+      "url": serviceUrl,
+      "description": description,
+      "provider": {
+        "@type": "LocalBusiness",
+        "name": "STEAMORA Cleaning"
+      }
+    }
+  };
+};
+
 /**
  * Dynamically updates the document title, meta description, Open Graph, and Twitter SEO tags
  * based on the current page route and parameters.
@@ -240,6 +310,15 @@ export function updatePageSeo(
   // 5. Update Twitter Card Meta Tags
   setMetaTag('name', 'twitter:title', resolvedSeo.ogTitle || resolvedSeo.title);
   setMetaTag('name', 'twitter:description', resolvedSeo.ogDescription || resolvedSeo.description);
+
+  // 6. Update Structured Data
+  if (resolvedSeo.canonicalPath && resolvedSeo.canonicalPath !== '/' && !resolvedSeo.canonicalPath.includes('suburbs') && !resolvedSeo.canonicalPath.includes('service-areas')) {
+     const serviceName = resolvedSeo.title.split('|')[0].trim();
+     setStructuredData(generateServiceSchema(serviceName, `https://steamoracleaning.com.au${resolvedSeo.canonicalPath}`, resolvedSeo.description));
+  } else {
+     setStructuredData(generateBaseSchema());
+  }
+
 
   return resolvedSeo;
 }

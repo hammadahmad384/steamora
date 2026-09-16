@@ -1,14 +1,25 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { Sparkles, MoveHorizontal } from 'lucide-react';
 
-import carpetDirty from '../../assets/images/carpet_dirty_1789488993861.jpg';
-import carpetClean from '../../assets/images/carpet_clean_1789489033341.jpg';
-import couchDirty from '../../assets/images/couch_dirty_1789489088243.jpg';
-import couchClean from '../../assets/images/couch_clean_1789489103039.jpg';
-import mattressDirty from '../../assets/images/mattress_dirty_1789489054270.jpg';
-import mattressClean from '../../assets/images/mattress_clean_1789489070850.jpg';
-import rugDirty from '../../assets/images/rug_dirty_1789489120189.jpg';
-import rugClean from '../../assets/images/rug_clean_1789489139142.jpg';
+import carpetClean from '../../assets/images/carpet_clean_1789575779353.jpg';
+import carpetDirty from '../../assets/images/carpet_dirty_1789575868087.jpg';
+
+import sofaClean from '../../assets/images/sofa_clean_1789575797999.jpg';
+import sofaDirty from '../../assets/images/sofa_dirty_1789575885563.jpg';
+
+import upholsteryClean from '../../assets/images/upholstery_clean_1789575812050.jpg';
+import upholsteryDirty from '../../assets/images/upholstery_dirty_1789575904935.jpg';
+
+import mattressClean from '../../assets/images/mattress_clean_1789575828605.jpg';
+import mattressDirty from '../../assets/images/mattress_dirty_1789575922187.jpg';
+
+import blindsClean from '../../assets/images/blinds_clean_1789575842157.jpg';
+import blindsDirty from '../../assets/images/blinds_dirty_1789575939485.jpg';
+import sofaBefore from '../../assets/images/couch_cleaning_1789557730033.jpg';
+import upholsteryBefore from '../../assets/images/upholstery_cleaning_1789557694109.jpg';
+import mattressBefore from '../../assets/images/mattress_cleaning_1789557704437.jpg';
+import blindBefore from '../../assets/images/blind_cleaning_1789557718412.jpg';
+
 
 interface BeforeAfterItem {
   id: string;
@@ -37,30 +48,40 @@ const ITEMS: BeforeAfterItem[] = [
     category: 'Sofa Cleaning',
     title: 'Designer 4-Seater Cream Modular Lounge',
     location: 'Southbank High-Rise Residence',
-    beforeImg: couchDirty,
-    afterImg: couchClean,
+    beforeImg: sofaDirty,
+    afterImg: sofaClean,
     description: 'Lifted stubborn latte rings, pet body grease, and fabric discoloration using low-moisture botanical enzyme foam.',
     metric: '100% Watermark Removal'
+  },
+  {
+    id: 'upholstery',
+    category: 'Dining & Velvet',
+    title: 'Mid-Century Velvet Dining Chairs & Ottoman',
+    location: 'South Yarra Apartment',
+    beforeImg: upholsteryDirty,
+    afterImg: upholsteryClean,
+    description: 'Delicate hand extraction revitalised compressed velvet fibers and eradicated oily handrest stains.',
+    metric: 'Zero Fiber Shrinkage'
   },
   {
     id: 'mattress',
     category: 'Mattress Sanitisation',
     title: 'King Size Pillow-Top Mattress',
-    location: 'South Yarra Apartment',
+    location: 'Brighton Coastal Estate',
     beforeImg: mattressDirty,
     afterImg: mattressClean,
-    description: 'Delicate hand extraction revitalised compressed fibers and eradicated oily stains and allergens.',
-    metric: 'Zero Fiber Shrinkage & 99% Allergen Removal'
+    description: 'Deep extraction removed dust mites, allergens, and perspiration stains, restoring a hygienic sleep environment.',
+    metric: 'Allergen-Free Certification'
   },
   {
-    id: 'rug',
-    category: 'Rug Deep Steam',
-    title: 'Oriental Style Living Room Rug',
-    location: 'Brighton Coastal Estate',
-    beforeImg: rugDirty,
-    afterImg: rugClean,
-    description: 'Hydro-rotary extraction stripped 7 years of deep-seated dust and grime from delicate rug fibers.',
-    metric: 'Original Colors Restored'
+    id: 'blind',
+    category: 'Blind Cleaning',
+    title: 'Venetian & Roller Blinds',
+    location: 'Melbourne CBD Apartment',
+    beforeImg: blindsDirty,
+    afterImg: blindsClean,
+    description: 'Ultrasonic cleaning technology dissolved accumulated dust, grease, and nicotine stains without damaging delicate slats.',
+    metric: 'Original Brilliance Restored'
   }
 ];
 
@@ -144,8 +165,7 @@ export default function BeforeAfterSlider() {
               style={{ width: containerRef.current?.offsetWidth || '100%' }}
             />
             
-            {/* Subtle filter on before to simulate grime/stain if photo is clean */}
-            <div className="absolute inset-0 bg-amber-950/20 mix-blend-multiply pointer-events-none" />
+            
           </div>
 
           {/* Dividing Bar */}

@@ -99,8 +99,9 @@ export default function ServiceDetailPage({ serviceSlug, onNavigate, onOpenQuote
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20">
                 <img
                   src={service.bannerImage}
-                  alt={service.title}
+                  alt={service.bannerAlt || service.title}
                   className="w-full h-[360px] sm:h-[420px] object-cover"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
                 <div className="absolute bottom-5 left-5 right-5 text-white">
@@ -356,6 +357,25 @@ export default function ServiceDetailPage({ serviceSlug, onNavigate, onOpenQuote
               className="px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-sm rounded-2xl border border-white/20"
             >
               Schedule Online Now
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. INTERNAL LINKING */}
+      <section className="bg-slate-50 py-16 border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Explore Our Cleaning Services</h2>
+          <div className="flex flex-wrap justify-center gap-4">
+            <button onClick={() => onNavigate('service-sofa')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:text-teal-600 hover:border-teal-200 transition-colors shadow-sm font-medium">Sofa Cleaning</button>
+            <button onClick={() => onNavigate('service-carpet')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:text-teal-600 hover:border-teal-200 transition-colors shadow-sm font-medium">Carpet Cleaning</button>
+            <button onClick={() => onNavigate('service-upholstery')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:text-teal-600 hover:border-teal-200 transition-colors shadow-sm font-medium">Upholstery Cleaning</button>
+            <button onClick={() => onNavigate('service-mattress')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:text-teal-600 hover:border-teal-200 transition-colors shadow-sm font-medium">Mattress Cleaning</button>
+            <button onClick={() => onNavigate('service-blind')} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-slate-700 hover:text-teal-600 hover:border-teal-200 transition-colors shadow-sm font-medium">Blind Cleaning</button>
+          </div>
+          <div className="mt-8">
+            <button onClick={() => onNavigate('home')} className="text-teal-600 hover:text-teal-700 font-bold uppercase tracking-wide text-sm flex items-center justify-center gap-2 mx-auto">
+              <ArrowLeft className="w-4 h-4" /> Back to Home
             </button>
           </div>
         </div>

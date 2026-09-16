@@ -41,8 +41,9 @@ export default function ServicesPage({ onNavigate, onOpenQuoteModal }: ServicesP
                 <div className="relative rounded-3xl overflow-hidden shadow-lg border-2 border-slate-100 group">
                   <img
                     src={srv.bannerImage}
-                    alt={srv.title}
+                    alt={srv.bannerAlt || srv.title}
                     className="w-full h-[320px] sm:h-[400px] object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
                   <div className="absolute top-4 left-4">

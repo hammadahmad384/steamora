@@ -27,10 +27,19 @@ import { useState } from 'react';
 interface HomePageProps {
   onNavigate: (route: PageRoute, params?: any) => void;
   onOpenQuoteModal: (service?: string) => void;
+  dynamicServiceId?: string | null;
 }
 
-export default function HomePage({ onNavigate, onOpenQuoteModal }: HomePageProps) {
+export default function HomePage({ onNavigate, onOpenQuoteModal, dynamicServiceId }: HomePageProps) {
   const [openFaq, setOpenFaq] = useState<string | null>('faq-1');
+
+  // Determine if a valid dynamic service is requested via query param
+  let heroService = null;
+  if (dynamicServiceId) {
+    // try to match e.g. "sofa" to "sofa-cleaning"
+    heroService = SERVICES.find(s => s.id === dynamicServiceId || s.id.startsWith(dynamicServiceId) || s.slug.includes(dynamicServiceId));
+  }
+
 
   const handlePhoneClick = () => {
     trackConversion('phone_call_click', 'Hero Call Click');
@@ -280,8 +289,9 @@ export default function HomePage({ onNavigate, onOpenQuoteModal }: HomePageProps
               <div className="relative h-56 overflow-hidden bg-slate-900">
                 <img
                   src={srv.bannerImage}
-                  alt={srv.title}
+                  alt={srv.bannerAlt || srv.title}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  loading="lazy"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
                 <div className="absolute top-4 left-4">

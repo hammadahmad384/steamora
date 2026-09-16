@@ -1,9 +1,10 @@
 export type ServiceId = 
   | 'carpet-cleaning'
-  | 'couch-cleaning'
+  | 'sofa-cleaning'
   | 'mattress-cleaning'
   | 'blind-cleaning'
-  | 'rug-cleaning';
+  | 'rug-cleaning'
+  | 'upholstery-cleaning';
 
 export interface ServiceDetail {
   id: ServiceId;
@@ -16,6 +17,7 @@ export interface ServiceDetail {
   startingPrice: string;
   badge?: string;
   bannerImage: string;
+  bannerAlt?: string;
   beforeImage: string;
   afterImage: string;
   overview: string;
@@ -126,10 +128,12 @@ export interface CustomerInquiryFormData {
 
 export type PageRoute = 
   | 'home'
+  | 'not-found'
   | 'about'
   | 'services'
   | 'service-carpet'
-  | 'service-couch'
+  | 'service-sofa'
+  | 'service-upholstery'
   | 'service-mattress'
   | 'service-blind'
   | 'service-rug'

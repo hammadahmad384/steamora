@@ -23,11 +23,55 @@ import InquiryPage from './pages/InquiryPage';
 import GoogleAdsLandingPage from './pages/GoogleAdsLandingPage';
 import { updatePageSeo } from './utils/seo';
 
+
+const mapPathToRoute = (path: string): { route: PageRoute; param: string } => {
+  if (path === '/') return { route: 'home', param: '' };
+  if (path === '/about') return { route: 'about', param: '' };
+  if (path === '/services') return { route: 'services', param: '' };
+  if (path === '/reviews') return { route: 'reviews', param: '' };
+  if (path === '/faq') return { route: 'faq', param: '' };
+  if (path === '/book-online') return { route: 'book-online', param: '' };
+  if (path === '/contact') return { route: 'contact', param: '' };
+  if (path === '/sofa-cleaning') return { route: 'service-sofa', param: 'sofa-cleaning' };
+  if (path === '/carpet-cleaning') return { route: 'service-carpet', param: 'carpet-cleaning' };
+  if (path === '/upholstery-cleaning') return { route: 'service-upholstery', param: 'upholstery-cleaning' };
+  if (path === '/mattress-cleaning') return { route: 'service-mattress', param: 'mattress-cleaning' };
+  if (path === '/blind-cleaning') return { route: 'service-blind', param: 'blind-cleaning' };
+  if (path === '/rug-cleaning') return { route: 'service-rug', param: 'rug-cleaning' };
+  if (path.startsWith('/suburbs/')) return { route: 'suburb-detail', param: path.replace('/suburbs/', '') };
+  return { route: 'not-found', param: '' }; // fallback
+};
+
+const mapRouteToPath = (route: PageRoute, param?: string): string => {
+  if (route === 'home') return '/';
+  if (route === 'service-sofa') return '/sofa-cleaning';
+  if (route === 'service-carpet') return '/carpet-cleaning';
+  if (route === 'service-upholstery') return '/upholstery-cleaning';
+  if (route === 'service-mattress') return '/mattress-cleaning';
+  if (route === 'service-blind') return '/blind-cleaning';
+  if (route === 'service-rug') return '/rug-cleaning';
+  if (route === 'suburb-detail' && param) return `/suburbs/${param}`;
+  return `/${route}`;
+};
+
 export default function App() {
   const [currentRoute, setCurrentRoute] = useState<PageRoute>('home');
   const [routeParam, setRouteParam] = useState<string>('');
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [quoteServiceTarget, setQuoteServiceTarget] = useState<string | undefined>(undefined);
+
+  // Handle initial URL mapping and popstate
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const { route, param } = mapPathToRoute(window.location.pathname);
+      setCurrentRoute(route);
+      setRouteParam(param);
+    };
+
+    handleLocationChange(); // Read on mount
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
 
   // Dynamically update document title & meta tags for SEO and scroll to top upon page navigation
   useEffect(() => {
@@ -37,18 +81,27 @@ export default function App() {
 
   const handleNavigate = (route: PageRoute, param?: string) => {
     setCurrentRoute(route);
-    if (param) {
-      setRouteParam(param);
-    } else if (route.startsWith('service-')) {
-      const slug = route.replace('service-', '');
-      setRouteParam(slug);
-    } else {
-      setRouteParam('');
+    let resolvedParam = param || '';
+    if (!resolvedParam && route.startsWith('service-')) {
+      resolvedParam = route.replace('service-', '') + '-cleaning';
+    }
+    setRouteParam(resolvedParam);
+    
+    const newPath = mapRouteToPath(route, resolvedParam);
+    if (window.location.pathname !== newPath) {
+      window.history.pushState({}, '', newPath);
     }
   };
 
   const handleOpenQuoteModal = (service?: string) => {
-    setQuoteServiceTarget(service);
+    let resolvedService = service;
+    if (!resolvedService && currentRoute.startsWith('service-')) {
+      resolvedService = currentRoute.replace('service-', '') + '-cleaning';
+    } else if (!resolvedService && typeof window !== 'undefined') {
+      const dynamicService = new URLSearchParams(window.location.search).get('service');
+      if (dynamicService) resolvedService = dynamicService;
+    }
+    setQuoteServiceTarget(resolvedService);
     setIsQuoteModalOpen(true);
   };
 
@@ -64,6 +117,7 @@ export default function App() {
           <HomePage
             onNavigate={handleNavigate}
             onOpenQuoteModal={handleOpenQuoteModal}
+            dynamicServiceId={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('service') : null}
           />
         );
 
@@ -92,10 +146,18 @@ export default function App() {
           />
         );
 
-      case 'service-couch':
+      case 'service-sofa':
         return (
           <ServiceDetailPage
-            serviceSlug="couch-cleaning"
+            serviceSlug="sofa-cleaning"
+            onNavigate={handleNavigate}
+            onOpenQuoteModal={handleOpenQuoteModal}
+          />
+        );
+      case 'service-upholstery':
+        return (
+          <ServiceDetailPage
+            serviceSlug="upholstery-cleaning"
             onNavigate={handleNavigate}
             onOpenQuoteModal={handleOpenQuoteModal}
           />
@@ -192,11 +254,30 @@ export default function App() {
           />
         );
 
+      case 'not-found':
+        return (
+          <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-4">
+            <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-950 tracking-tight mb-4">404 - Page Not Found</h1>
+            <p className="text-lg text-slate-600 mb-8 max-w-md">We couldn't find the page you were looking for. Explore our professional cleaning services below.</p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button onClick={() => handleNavigate('home')} className="px-6 py-3 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl transition-colors">Go Home</button>
+              <button onClick={() => handleNavigate('services')} className="px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition-colors">View All Services</button>
+            </div>
+            <div className="mt-12 grid grid-cols-2 gap-4 text-left max-w-lg w-full">
+              <button onClick={() => handleNavigate('service-carpet')} className="text-teal-600 hover:underline font-semibold">Carpet Cleaning →</button>
+              <button onClick={() => handleNavigate('service-sofa')} className="text-teal-600 hover:underline font-semibold">Sofa Cleaning →</button>
+              <button onClick={() => handleNavigate('service-upholstery')} className="text-teal-600 hover:underline font-semibold">Upholstery Cleaning →</button>
+              <button onClick={() => handleNavigate('service-mattress')} className="text-teal-600 hover:underline font-semibold">Mattress Cleaning →</button>
+              <button onClick={() => handleNavigate('service-blind')} className="text-teal-600 hover:underline font-semibold">Blind Cleaning →</button>
+            </div>
+          </div>
+        );
       default:
         return (
           <HomePage
             onNavigate={handleNavigate}
             onOpenQuoteModal={handleOpenQuoteModal}
+            dynamicServiceId={typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('service') : null}
           />
         );
     }
