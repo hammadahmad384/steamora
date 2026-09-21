@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { PageRoute } from './types';
 import Navbar from './components/layout/Navbar';
 import Footer from './components/layout/Footer';
@@ -7,21 +7,33 @@ import QuoteModal from './components/ui/QuoteModal';
 import WhatsAppButton from './components/ui/WhatsAppButton';
 import SteamoraAssistant from './components/ui/SteamoraAssistant';
 import ConversionToast from './components/ui/ConversionToast';
-
-// Pages
-import HomePage from './pages/HomePage';
-import AboutPage from './pages/AboutPage';
-import ServicesPage from './pages/ServicesPage';
-import ServiceDetailPage from './pages/ServiceDetailPage';
-import ServiceAreasPage from './pages/ServiceAreasPage';
-import SuburbLandingPage from './pages/SuburbLandingPage';
-import ReviewsPage from './pages/ReviewsPage';
-import FaqPage from './pages/FaqPage';
-import BookingPage from './pages/BookingPage';
-import ContactPage from './pages/ContactPage';
-import InquiryPage from './pages/InquiryPage';
-import GoogleAdsLandingPage from './pages/GoogleAdsLandingPage';
 import { updatePageSeo } from './utils/seo';
+
+// Route-based Code Splitting via React.lazy for optimized initial load
+const HomePage = lazy(() => import('./pages/HomePage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const ServiceDetailPage = lazy(() => import('./pages/ServiceDetailPage'));
+const ServiceAreasPage = lazy(() => import('./pages/ServiceAreasPage'));
+const SuburbLandingPage = lazy(() => import('./pages/SuburbLandingPage'));
+const ReviewsPage = lazy(() => import('./pages/ReviewsPage'));
+const FaqPage = lazy(() => import('./pages/FaqPage'));
+const BookingPage = lazy(() => import('./pages/BookingPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const InquiryPage = lazy(() => import('./pages/InquiryPage'));
+const GoogleAdsLandingPage = lazy(() => import('./pages/GoogleAdsLandingPage'));
+
+function PageLoadingFallback() {
+  return (
+    <div className="min-h-[50vh] flex flex-col items-center justify-center py-24 px-4 text-center">
+      <div className="relative w-12 h-12 mb-4">
+        <div className="absolute inset-0 rounded-full border-2 border-teal-500/20 animate-ping" />
+        <div className="w-12 h-12 rounded-full border-3 border-teal-500 border-t-transparent animate-spin" />
+      </div>
+      <p className="text-sm font-medium text-slate-500">Loading experience...</p>
+    </div>
+  );
+}
 
 
 const mapPathToRoute = (path: string): { route: PageRoute; param: string } => {
@@ -32,12 +44,12 @@ const mapPathToRoute = (path: string): { route: PageRoute; param: string } => {
   if (path === '/faq') return { route: 'faq', param: '' };
   if (path === '/book-online') return { route: 'book-online', param: '' };
   if (path === '/contact') return { route: 'contact', param: '' };
-  if (path === '/sofa-cleaning') return { route: 'service-sofa', param: 'sofa-cleaning' };
-  if (path === '/carpet-cleaning') return { route: 'service-carpet', param: 'carpet-cleaning' };
-  if (path === '/upholstery-cleaning') return { route: 'service-upholstery', param: 'upholstery-cleaning' };
-  if (path === '/mattress-cleaning') return { route: 'service-mattress', param: 'mattress-cleaning' };
-  if (path === '/blind-cleaning') return { route: 'service-blind', param: 'blind-cleaning' };
-  if (path === '/rug-cleaning') return { route: 'service-rug', param: 'rug-cleaning' };
+  if (path === '/sofa-cleaning' || path === '/services/sofa-cleaning') return { route: 'service-sofa', param: 'sofa-cleaning' };
+  if (path === '/carpet-cleaning' || path === '/services/carpet-cleaning') return { route: 'service-carpet', param: 'carpet-cleaning' };
+  if (path === '/upholstery-cleaning' || path === '/services/upholstery-cleaning') return { route: 'service-upholstery', param: 'upholstery-cleaning' };
+  if (path === '/mattress-cleaning' || path === '/services/mattress-cleaning') return { route: 'service-mattress', param: 'mattress-cleaning' };
+  if (path === '/blind-cleaning' || path === '/services/blind-cleaning') return { route: 'service-blind', param: 'blind-cleaning' };
+  if (path === '/rug-cleaning' || path === '/services/rug-cleaning') return { route: 'service-rug', param: 'rug-cleaning' };
   if (path.startsWith('/suburbs/')) return { route: 'suburb-detail', param: path.replace('/suburbs/', '') };
   return { route: 'not-found', param: '' }; // fallback
 };
@@ -292,9 +304,11 @@ export default function App() {
         onOpenQuoteModal={handleOpenQuoteModal}
       />
 
-      {/* Main Dynamic View */}
+      {/* Main Dynamic View with Suspense for Code-Split Routes */}
       <main className="flex-1">
-        {renderCurrentPage()}
+        <Suspense fallback={<PageLoadingFallback />}>
+          {renderCurrentPage()}
+        </Suspense>
       </main>
 
       {/* Footer */}

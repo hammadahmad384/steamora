@@ -36,6 +36,8 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     message: ''
   });
 
+  const [isCustomArea, setIsCustomArea] = useState(false);
+  const [customArea, setCustomArea] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedData, setSubmittedData] = useState<typeof formData | null>(null);
@@ -62,7 +64,11 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     if (!formData.phone.trim() || formData.phone.replace(/[^0-9]/g, '').length < 8) {
       errs.phone = 'Please enter a valid Australian phone number (at least 8 digits)';
     }
-    if (!formData.area.trim()) {
+    if (isCustomArea || formData.area === 'Other') {
+      if (!customArea.trim()) {
+        errs.customArea = 'Please enter your suburb or location';
+      }
+    } else if (!formData.area.trim()) {
       errs.area = 'Please select or specify your Melbourne area';
     }
     setErrors(errs);
@@ -118,7 +124,11 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     e.preventDefault();
     if (!validate()) return;
 
-    const dataToSubmit = { ...formData };
+    const resolvedArea = (isCustomArea || formData.area === 'Other') && customArea.trim()
+      ? customArea.trim()
+      : formData.area;
+
+    const dataToSubmit = { ...formData, area: resolvedArea };
     setSubmittedData(dataToSubmit);
 
     // Track analytics conversion
@@ -351,6 +361,8 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
                     onClick={() => {
                       setIsSubmitted(false);
                       setSubmittedData(null);
+                      setIsCustomArea(false);
+                      setCustomArea('');
                     }}
                     className="text-xs text-slate-500 hover:text-slate-800 font-semibold underline"
                   >
@@ -432,19 +444,69 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
                       Melbourne Area / Suburb *
                     </label>
                     <select
-                      value={formData.area}
-                      onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                      value={isCustomArea ? 'Other' : formData.area}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'Other') {
+                          setIsCustomArea(true);
+                          setFormData({ ...formData, area: 'Other' });
+                        } else {
+                          setIsCustomArea(false);
+                          setFormData({ ...formData, area: val });
+                          if (errors.customArea) {
+                            setErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.customArea;
+                              return next;
+                            });
+                          }
+                        }
+                      }}
                       className="w-full text-xs sm:text-sm py-3 px-3.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-slate-800"
                     >
-                      {MELBOURNE_SUBURBS.map((sub) => (
-                        <option key={sub.slug} value={`${sub.name} (VIC ${sub.postcode})`}>
-                          {sub.name} (VIC {sub.postcode})
-                        </option>
-                      ))}
-                      <option value="Other Melbourne Suburb">Other Melbourne Suburb</option>
-                      <option value="Mornington Peninsula / Outer Region">Mornington Peninsula / Outer Region</option>
-                      <option value="Geelong / Regional Victoria">Geelong / Regional Victoria</option>
+                      <optgroup label="Popular Melbourne Suburbs">
+                        {MELBOURNE_SUBURBS.map((sub) => (
+                          <option key={sub.slug} value={`${sub.name} (VIC ${sub.postcode})`}>
+                            {sub.name} (VIC {sub.postcode})
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="Other Locations">
+                        <option value="Other">Other Suburb / Not Listed (Type manually)</option>
+                        <option value="Mornington Peninsula / Outer Region">Mornington Peninsula / Outer Region</option>
+                        <option value="Geelong / Regional Victoria">Geelong / Regional Victoria</option>
+                      </optgroup>
                     </select>
+
+                    {isCustomArea && (
+                      <div className="mt-2.5">
+                        <label className="block text-[11px] font-bold text-teal-700 mb-1">
+                          Enter your Suburb / Postcode / Location *
+                        </label>
+                        <input
+                          type="text"
+                          value={customArea}
+                          onChange={(e) => {
+                            setCustomArea(e.target.value);
+                            if (errors.customArea) {
+                              setErrors((prev) => {
+                                const next = { ...prev };
+                                delete next.customArea;
+                                return next;
+                              });
+                            }
+                          }}
+                          placeholder="e.g. Cranbourne, Altona 3018, Ballarat, Frankston..."
+                          className={`w-full text-xs sm:text-sm py-2.5 px-3.5 rounded-xl border ${
+                            errors.customArea ? 'border-red-500 bg-red-50/20' : 'border-teal-400 bg-teal-50/20'
+                          } focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900 placeholder:text-slate-400`}
+                          autoFocus
+                        />
+                        {errors.customArea && (
+                          <p className="text-red-500 text-xs mt-1 font-medium">{errors.customArea}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -466,8 +528,6 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
                       <option value="Rug Deep Steam Cleaning">Rug Deep Steam Cleaning (Persian / Wool / Modern)</option>
                       <option value="End of Lease Carpet Clean">End of Lease / Bond Guarantee Package</option>
                       <option value="Emergency Flood Water Extraction">24/7 Emergency Flood / Water Extraction</option>
-                      <option value="Tile & Grout Deep Cleaning">Tile & Grout Pressure Cleaning</option>
-                      <option value="Multiple Services Bundle">Multiple Services Package</option>
                     </select>
                   </div>
 

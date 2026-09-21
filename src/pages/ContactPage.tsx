@@ -29,6 +29,8 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
     message: ''
   });
 
+  const [isCustomSuburb, setIsCustomSuburb] = useState(false);
+  const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -37,6 +39,9 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
     if (!formData.name.trim()) errs.name = 'Please provide your name';
     if (!formData.phone.trim() || formData.phone.length < 8) errs.phone = 'Valid phone number is required';
     if (!formData.email.trim() || !formData.email.includes('@')) errs.email = 'Valid email is required';
+    if (isCustomSuburb || formData.suburb === 'Other') {
+      if (!customSuburb.trim()) errs.customSuburb = 'Please enter your suburb or location';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -45,9 +50,13 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
     e.preventDefault();
     if (!validate()) return;
 
+    const resolvedSuburb = (isCustomSuburb || formData.suburb === 'Other') && customSuburb.trim()
+      ? customSuburb.trim()
+      : formData.suburb;
+
     trackConversion(
       'quote_form_submit',
-      `Contact Enquiry: ${formData.name} (${formData.suburb}) - ${formData.service}`
+      `Contact Enquiry: ${formData.name} (${resolvedSuburb}) - ${formData.service}`
     );
 
     setIsSubmitted(true);
@@ -297,8 +306,24 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
                       Melbourne Suburb *
                     </label>
                     <select
-                      value={formData.suburb}
-                      onChange={(e) => setFormData({ ...formData, suburb: e.target.value })}
+                      value={isCustomSuburb ? 'Other' : formData.suburb}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'Other') {
+                          setIsCustomSuburb(true);
+                          setFormData({ ...formData, suburb: 'Other' });
+                        } else {
+                          setIsCustomSuburb(false);
+                          setFormData({ ...formData, suburb: val });
+                          if (errors.customSuburb) {
+                            setErrors((prev) => {
+                              const next = { ...prev };
+                              delete next.customSuburb;
+                              return next;
+                            });
+                          }
+                        }
+                      }}
                       className="w-full text-xs sm:text-sm py-2.5 px-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 bg-white"
                     >
                       {MELBOURNE_SUBURBS.map(sub => (
@@ -306,8 +331,35 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
                           {sub.name} (VIC {sub.postcode})
                         </option>
                       ))}
-                      <option value="Other Melbourne">Other Melbourne Suburb</option>
+                      <option value="Other">Other Suburb / Not Listed (Type manually)</option>
                     </select>
+
+                    {isCustomSuburb && (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          value={customSuburb}
+                          onChange={(e) => {
+                            setCustomSuburb(e.target.value);
+                            if (errors.customSuburb) {
+                              setErrors((prev) => {
+                                const next = { ...prev };
+                                delete next.customSuburb;
+                                return next;
+                              });
+                            }
+                          }}
+                          placeholder="Type your suburb or location..."
+                          className={`w-full text-xs sm:text-sm py-2 px-3 rounded-lg border ${
+                            errors.customSuburb ? 'border-red-500 bg-red-50/20' : 'border-teal-400 bg-teal-50/20'
+                          } focus:ring-2 focus:ring-teal-500 text-slate-900`}
+                          autoFocus
+                        />
+                        {errors.customSuburb && (
+                          <p className="text-red-500 text-xs mt-1">{errors.customSuburb}</p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -323,7 +375,8 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
                     <option value="Carpet Steam Cleaning">Carpet Steam Cleaning (Residential / Commercial)</option>
                     <option value="Upholstery & Couch Cleaning">Upholstery & Couch Steam Cleaning</option>
                     <option value="Mattress Deep Sanitisation">Mattress Deep Thermal Sanitisation</option>
-                    <option value="Tile & Grout Cleaning">Tile & Grout High-Pressure Restoration</option>
+                    <option value="Blind Cleaning">Blind Cleaning (Roller / Venetian / Vertical)</option>
+                    <option value="Rug Steam Cleaning">Rug Deep Steam Cleaning</option>
                     <option value="End of Lease Cleaning">End of Lease / Bond Guarantee Package</option>
                     <option value="Commercial Office Cleaning">Commercial Office / Venue Package</option>
                   </select>

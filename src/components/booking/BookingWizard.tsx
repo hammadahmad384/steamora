@@ -33,6 +33,8 @@ export default function BookingWizard() {
 
   const [propertyType, setPropertyType] = useState<'house' | 'apartment' | 'office' | 'commercial'>('house');
   const [suburb, setSuburb] = useState('Richmond');
+  const [isCustomSuburb, setIsCustomSuburb] = useState(false);
+  const [customSuburb, setCustomSuburb] = useState('');
   const [streetAddress, setStreetAddress] = useState('');
   const [parking, setParking] = useState<'driveway' | 'street' | 'visitor' | 'none'>('driveway');
   const [hasLift, setHasLift] = useState(true);
@@ -78,7 +80,11 @@ export default function BookingWizard() {
   const validateStep = (s: number) => {
     const errs: Record<string, string> = {};
     if (s === 2) {
-      if (!suburb) errs.suburb = 'Please select a suburb';
+      if (isCustomSuburb || suburb === 'Other') {
+        if (!customSuburb.trim()) errs.customSuburb = 'Please enter your suburb or location';
+      } else if (!suburb) {
+        errs.suburb = 'Please select a suburb';
+      }
       if (!streetAddress.trim()) errs.streetAddress = 'Please enter your street address';
     }
     if (s === 3) {
@@ -95,6 +101,9 @@ export default function BookingWizard() {
 
   const handleNext = () => {
     if (!validateStep(step)) return;
+    if (step === 2 && (isCustomSuburb || suburb === 'Other') && customSuburb.trim()) {
+      setSuburb(customSuburb.trim());
+    }
     setStep(prev => Math.min(4, prev + 1));
   };
 
@@ -488,8 +497,24 @@ export default function BookingWizard() {
                   Melbourne Suburb *
                 </label>
                 <select
-                  value={suburb}
-                  onChange={(e) => setSuburb(e.target.value)}
+                  value={isCustomSuburb ? 'Other' : suburb}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === 'Other') {
+                      setIsCustomSuburb(true);
+                      setSuburb('Other');
+                    } else {
+                      setIsCustomSuburb(false);
+                      setSuburb(val);
+                      if (errors.customSuburb) {
+                        setErrors((prev) => {
+                          const next = { ...prev };
+                          delete next.customSuburb;
+                          return next;
+                        });
+                      }
+                    }
+                  }}
                   className="w-full text-sm py-3 px-3.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-teal-500 bg-white font-medium"
                 >
                   {MELBOURNE_SUBURBS.map(sub => (
@@ -497,9 +522,36 @@ export default function BookingWizard() {
                       {sub.name} (VIC {sub.postcode})
                     </option>
                   ))}
-                  <option value="Other Melbourne">Other Melbourne Suburb</option>
+                  <option value="Other">Other Suburb / Not Listed (Type manually)</option>
                 </select>
                 {errors.suburb && <p className="text-red-500 text-xs mt-1">{errors.suburb}</p>}
+
+                {isCustomSuburb && (
+                  <div className="mt-2.5">
+                    <input
+                      type="text"
+                      value={customSuburb}
+                      onChange={(e) => {
+                        setCustomSuburb(e.target.value);
+                        if (errors.customSuburb) {
+                          setErrors((prev) => {
+                            const next = { ...prev };
+                            delete next.customSuburb;
+                            return next;
+                          });
+                        }
+                      }}
+                      placeholder="Type your suburb or location..."
+                      className={`w-full text-xs sm:text-sm py-2.5 px-3 rounded-lg border ${
+                        errors.customSuburb ? 'border-red-500 bg-red-50/20' : 'border-teal-400 bg-teal-50/20'
+                      } focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900`}
+                      autoFocus
+                    />
+                    {errors.customSuburb && (
+                      <p className="text-red-500 text-xs mt-1">{errors.customSuburb}</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>

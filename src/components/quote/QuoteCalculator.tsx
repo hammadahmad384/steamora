@@ -28,6 +28,8 @@ export default function QuoteCalculator({
     message: ''
   });
 
+  const [isCustomSuburb, setIsCustomSuburb] = useState(false);
+  const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -77,7 +79,11 @@ export default function QuoteCalculator({
     if (!formData.email.trim() || !formData.email.includes('@')) {
       errs.email = 'Please enter a valid email address';
     }
-    if (!formData.suburb.trim()) errs.suburb = 'Please select your Melbourne suburb';
+    if (isCustomSuburb || formData.suburb === 'Other') {
+      if (!customSuburb.trim()) errs.customSuburb = 'Please enter your suburb or location';
+    } else if (!formData.suburb.trim()) {
+      errs.suburb = 'Please select your Melbourne suburb';
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -86,12 +92,17 @@ export default function QuoteCalculator({
     e.preventDefault();
     if (!validate()) return;
 
+    const resolvedSuburb = (isCustomSuburb || formData.suburb === 'Other') && customSuburb.trim()
+      ? customSuburb.trim()
+      : formData.suburb;
+
     trackConversion(
       'quote_form_submit',
-      `Free Quote: ${formData.fullName} - ${formData.service} (${formData.suburb})`,
+      `Free Quote: ${formData.fullName} - ${formData.service} (${resolvedSuburb})`,
       estimatedPriceMin
     );
 
+    setFormData(prev => ({ ...prev, suburb: resolvedSuburb }));
     setIsSubmitted(true);
     if (onSuccess) onSuccess();
   };
@@ -248,8 +259,24 @@ export default function QuoteCalculator({
               Melbourne Suburb *
             </label>
             <select
-              value={formData.suburb}
-              onChange={(e) => setFormData({ ...formData, suburb: e.target.value })}
+              value={isCustomSuburb ? 'Other' : formData.suburb}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === 'Other') {
+                  setIsCustomSuburb(true);
+                  setFormData({ ...formData, suburb: 'Other' });
+                } else {
+                  setIsCustomSuburb(false);
+                  setFormData({ ...formData, suburb: val });
+                  if (errors.customSuburb) {
+                    setErrors((prev) => {
+                      const next = { ...prev };
+                      delete next.customSuburb;
+                      return next;
+                    });
+                  }
+                }
+              }}
               className={`w-full text-sm py-3 px-3.5 rounded-xl border ${
                 errors.suburb ? 'border-red-500' : 'border-slate-300'
               } focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white font-medium text-slate-800`}
@@ -259,9 +286,36 @@ export default function QuoteCalculator({
                   {sub.name} ({sub.postcode})
                 </option>
               ))}
-              <option value="Other Melbourne Suburb">Other Greater Melbourne Suburb</option>
+              <option value="Other">Other Suburb / Not Listed (Type manually)</option>
             </select>
             {errors.suburb && <p className="text-red-500 text-xs mt-1">{errors.suburb}</p>}
+
+            {isCustomSuburb && (
+              <div className="mt-2.5">
+                <input
+                  type="text"
+                  value={customSuburb}
+                  onChange={(e) => {
+                    setCustomSuburb(e.target.value);
+                    if (errors.customSuburb) {
+                      setErrors((prev) => {
+                        const next = { ...prev };
+                        delete next.customSuburb;
+                        return next;
+                      });
+                    }
+                  }}
+                  placeholder="Type your suburb or location..."
+                  className={`w-full text-xs sm:text-sm py-2.5 px-3 rounded-lg border ${
+                    errors.customSuburb ? 'border-red-500 bg-red-50/20' : 'border-teal-400 bg-teal-50/20'
+                  } focus:outline-none focus:ring-2 focus:ring-teal-500 text-slate-900`}
+                  autoFocus
+                />
+                {errors.customSuburb && (
+                  <p className="text-red-500 text-xs mt-1">{errors.customSuburb}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
 

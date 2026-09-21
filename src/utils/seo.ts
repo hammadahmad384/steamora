@@ -10,7 +10,14 @@ export interface PageSeoConfig {
   keywords?: string;
   ogTitle?: string;
   ogDescription?: string;
+  ogImage?: string;
   canonicalPath?: string;
+  serviceData?: {
+    name: string;
+    price: number;
+    priceFormatted: string;
+    image: string;
+  };
 }
 
 const BASE_URL = 'https://steamoracleaning.com.au';
@@ -24,8 +31,11 @@ export function getPageSeo(route: PageRoute, param?: string): PageSeoConfig {
     case 'home':
       return {
         title: `STEAMORA Cleaning | Professional Cleaning Services in Melbourne`,
-        description: `Professional cleaning services in Melbourne from STEAMORA Cleaning. Explore sofa, carpet, upholstery, mattress and blind cleaning services. Request a free quote.`,
-        keywords: 'steam cleaning melbourne, carpet steam cleaning, couch cleaning melbourne, mattress sanitisation, end of lease carpet cleaning',
+        description: `Professional cleaning services in Melbourne from STEAMORA Cleaning. Explore sofa, carpet, upholstery, mattress, blind and rug cleaning services. Request a free quote.`,
+        keywords: 'steam cleaning melbourne, carpet steam cleaning, couch cleaning melbourne, upholstery cleaning melbourne, mattress sanitisation, blind cleaning, rug cleaning',
+        ogTitle: `STEAMORA Cleaning | Professional Cleaning Services in Melbourne`,
+        ogDescription: `Professional cleaning services in Melbourne from STEAMORA Cleaning. Explore sofa, carpet, upholstery, mattress, blind and rug cleaning services. Request a free quote.`,
+        ogImage: '/images/carpet-cleaning.webp',
         canonicalPath: '/'
       };
 
@@ -37,60 +47,125 @@ export function getPageSeo(route: PageRoute, param?: string): PageSeoConfig {
         canonicalPath: '/about'
       };
 
-    case 'services':
+    case 'services': {
+      if (param) {
+        const cleanParam = param.toLowerCase().trim();
+        if (cleanParam === 'carpet-cleaning' || cleanParam === 'carpet') return getPageSeo('service-carpet');
+        if (cleanParam === 'sofa-cleaning' || cleanParam === 'sofa' || cleanParam === 'couch-cleaning') return getPageSeo('service-sofa');
+        if (cleanParam === 'upholstery-cleaning' || cleanParam === 'upholstery') return getPageSeo('service-upholstery');
+        if (cleanParam === 'mattress-cleaning' || cleanParam === 'mattress') return getPageSeo('service-mattress');
+        if (cleanParam === 'blind-cleaning' || cleanParam === 'blind') return getPageSeo('service-blind');
+        if (cleanParam === 'rug-cleaning' || cleanParam === 'rug') return getPageSeo('service-rug');
+      }
       return {
         title: `Steam Cleaning Services & Pricing${BRAND_SUFFIX}`,
         description: `Transparent Melbourne steam cleaning pricing: Carpet Steam Cleaning ($30–$35/room), Mattresses ($80–$100), Couch Cleaning ($25–$35/seat), Blinds ($25–$35), and Rugs ($80–$100).`,
         keywords: 'carpet cleaning prices melbourne, couch cleaning cost, mattress cleaning rates, steam cleaning services list',
         canonicalPath: '/services'
       };
-
+    }
 
     case 'service-carpet':
       return {
-        title: 'Carpet Cleaning Melbourne | STEAMORA Cleaning',
-        description: 'Professional carpet cleaning in Melbourne from STEAMORA Cleaning. Refresh carpets and remove built-up dirt and stains. Request a free quote.',
-        keywords: 'carpet cleaning melbourne, professional carpet cleaning, steam cleaning carpets',
-        canonicalPath: '/carpet-cleaning'
+        title: 'Carpet Steam Cleaning Melbourne | From $30 | STEAMORA Cleaning',
+        description: 'Melbourne carpet steam cleaning from $30/room. 210°F industrial extraction, tough stain removal, fast drying, and 100% bond-back guarantee. Get a free quote!',
+        keywords: 'carpet steam cleaning melbourne, professional carpet cleaning melbourne, steam cleaning carpets, end of lease carpet clean, bond back carpet cleaner',
+        canonicalPath: '/carpet-cleaning',
+        ogTitle: 'Carpet Steam Cleaning Melbourne | From $30 | STEAMORA Cleaning',
+        ogDescription: 'Melbourne carpet steam cleaning from $30/room. 210°F industrial extraction, tough stain removal, fast drying, and 100% bond-back guarantee. Get a free quote!',
+        ogImage: '/images/carpet-cleaning.webp',
+        serviceData: {
+          name: 'Carpet Steam Cleaning',
+          price: 30,
+          priceFormatted: '$30 - $35 Per Room',
+          image: '/images/carpet-cleaning.webp'
+        }
       };
+
     case 'service-sofa':
       return {
-        title: 'Sofa Cleaning Melbourne | STEAMORA Cleaning',
-        description: 'Professional sofa cleaning in Melbourne. Refresh your sofa and couch with professional cleaning from STEAMORA Cleaning. Request a free quote.',
-        keywords: 'sofa cleaning melbourne, couch cleaning melbourne, upholstery cleaning, professional sofa clean',
-        canonicalPath: '/sofa-cleaning'
+        title: 'Sofa & Couch Steam Cleaning Melbourne | STEAMORA Cleaning',
+        description: 'Professional sofa and couch steam cleaning in Melbourne from $25/seat. Gentle fabric care, deep stain removal, and rapid drying. Get a free instant quote!',
+        keywords: 'sofa cleaning melbourne, couch steam cleaning melbourne, upholstery cleaning, lounge cleaning melbourne, professional sofa clean',
+        canonicalPath: '/sofa-cleaning',
+        ogTitle: 'Sofa & Couch Steam Cleaning Melbourne | STEAMORA Cleaning',
+        ogDescription: 'Professional sofa and couch steam cleaning in Melbourne from $25/seat. Gentle fabric care, deep stain removal, and rapid drying. Get a free instant quote!',
+        ogImage: '/images/couch-cleaning.webp',
+        serviceData: {
+          name: 'Sofa & Couch Steam Cleaning',
+          price: 25,
+          priceFormatted: '$25 - $35 Per Seat',
+          image: '/images/couch-cleaning.webp'
+        }
       };
-    case 'service-mattress':
-      return {
-        title: 'Mattress Cleaning Melbourne | STEAMORA Cleaning',
-        description: 'Professional mattress cleaning in Melbourne from STEAMORA Cleaning. Refresh your mattress with professional cleaning. Request a free quote.',
-        keywords: 'mattress cleaning melbourne, professional mattress cleaning, clean mattress',
-        canonicalPath: '/mattress-cleaning'
-      };
+
     case 'service-upholstery':
       return {
-        title: 'Upholstery Cleaning Melbourne | STEAMORA Cleaning',
-        description: 'Professional upholstery cleaning in Melbourne from STEAMORA Cleaning. Refresh upholstered furniture with professional cleaning. Request a free quote.',
-        keywords: 'upholstery cleaning melbourne, fabric cleaning, professional upholstery cleaners',
-        canonicalPath: '/upholstery-cleaning'
+        title: 'Upholstery Steam Cleaning Melbourne | STEAMORA Cleaning',
+        description: 'Expert upholstery cleaning in Melbourne for lounges, dining chairs, and armchairs from $25/seat. Gentle fiber sanitisation and stain removal. Book today!',
+        keywords: 'upholstery cleaning melbourne, furniture steam cleaning, dining chair cleaning, armchair fabric cleaning, fabric steam clean melbourne',
+        canonicalPath: '/upholstery-cleaning',
+        ogTitle: 'Upholstery Steam Cleaning Melbourne | STEAMORA Cleaning',
+        ogDescription: 'Expert upholstery cleaning in Melbourne for lounges, dining chairs, and armchairs from $25/seat. Gentle fiber sanitisation and stain removal. Book today!',
+        ogImage: '/images/upholstery-cleaning.webp',
+        serviceData: {
+          name: 'Upholstery Cleaning',
+          price: 25,
+          priceFormatted: '$25 - $35 Per Seat',
+          image: '/images/upholstery-cleaning.webp'
+        }
       };
+
+    case 'service-mattress':
+      return {
+        title: 'Mattress Steam Cleaning & Sanitisation Melbourne | STEAMORA',
+        description: 'Hygienic mattress steam cleaning & sanitisation in Melbourne from $80. Eliminates 99.9% of dust mites, allergens, dead skin, and stains. Wake up refreshed!',
+        keywords: 'mattress cleaning melbourne, mattress sanitisation melbourne, dust mite removal mattress, steam clean mattress melbourne, clean mattress',
+        canonicalPath: '/mattress-cleaning',
+        ogTitle: 'Mattress Steam Cleaning & Sanitisation Melbourne | STEAMORA',
+        ogDescription: 'Hygienic mattress steam cleaning & sanitisation in Melbourne from $80. Eliminates 99.9% of dust mites, allergens, dead skin, and stains. Wake up refreshed!',
+        ogImage: '/images/mattress-cleaning.webp',
+        serviceData: {
+          name: 'Mattress Sanitisation & Steam Cleaning',
+          price: 80,
+          priceFormatted: '$80 - $100',
+          image: '/images/mattress-cleaning.webp'
+        }
+      };
+
     case 'service-blind':
       return {
-        title: 'Blind Cleaning Melbourne | STEAMORA Cleaning',
-        description: 'Professional blind cleaning in Melbourne from STEAMORA Cleaning. Remove accumulated dust and dirt and refresh your blinds. Request a free quote.',
-        keywords: 'blind cleaning melbourne, window blind cleaners, professional blind cleaning',
-        canonicalPath: '/blind-cleaning'
+        title: 'Blind Cleaning Melbourne | On-Site Service | STEAMORA Cleaning',
+        description: 'Professional on-site blind cleaning in Melbourne from $25/unit. Clean roller, venetian, and vertical blinds without removal. Remove dust and allergens safely!',
+        keywords: 'blind cleaning melbourne, roller blind cleaning, venetian blind cleaner, on site blind cleaning melbourne, vertical blind cleaning',
+        canonicalPath: '/blind-cleaning',
+        ogTitle: 'Blind Cleaning Melbourne | On-Site Service | STEAMORA Cleaning',
+        ogDescription: 'Professional on-site blind cleaning in Melbourne from $25/unit. Clean roller, venetian, and vertical blinds without removal. Remove dust and allergens safely!',
+        ogImage: '/images/blind-cleaning.webp',
+        serviceData: {
+          name: 'Blind Cleaning',
+          price: 25,
+          priceFormatted: '$25 - $35 Per Blind',
+          image: '/images/blind-cleaning.webp'
+        }
       };
-    case 'service-rug': {
-      const targetSlug = 'rug-cleaning';
-      const service = SERVICES.find(s => s.id === targetSlug) || SERVICES[0];
+
+    case 'service-rug':
       return {
-        title: `${service.title} Melbourne | STEAMORA Cleaning`,
-        description: `Professional ${service.shortTitle.toLowerCase()} in Melbourne. ${service.tagline}. Request a free quote.`,
-        keywords: `${service.shortTitle.toLowerCase()} melbourne, ${service.title.toLowerCase()}, steam clean ${service.shortTitle.toLowerCase()}`,
-        canonicalPath: `/rug-cleaning`
+        title: 'Rug Cleaning Melbourne | Persian, Wool & Area Rugs | STEAMORA',
+        description: 'Specialist rug cleaning in Melbourne from $80. Gentle fiber care for Persian, oriental, wool, and modern area rugs. Color-safe stain removal. Instant quote!',
+        keywords: 'rug cleaning melbourne, persian rug cleaning melbourne, oriental rug steam clean, wool rug cleaner melbourne, area rug cleaning',
+        canonicalPath: '/rug-cleaning',
+        ogTitle: 'Rug Cleaning Melbourne | Persian, Wool & Area Rugs | STEAMORA',
+        ogDescription: 'Specialist rug cleaning in Melbourne from $80. Gentle fiber care for Persian, oriental, wool, and modern area rugs. Color-safe stain removal. Instant quote!',
+        ogImage: 'https://steamoracleaning.com.au/images/rug-cleaning.webp',
+        serviceData: {
+          name: 'Rug Cleaning & Preservation',
+          price: 80,
+          priceFormatted: '$80 - $100',
+          image: 'https://steamoracleaning.com.au/images/rug-cleaning.webp'
+        }
       };
-    }
     case 'service-areas':
       return {
         title: `Service Areas Across Greater Melbourne${BRAND_SUFFIX}`,
@@ -232,32 +307,92 @@ const generateBaseSchema = () => {
     "@context": "https://schema.org",
     "@type": "CleaningService",
     "name": "STEAMORA Cleaning",
-    "image": "https://steamoracleaning.com.au/android-chrome-512x512.png",
-    "url": "https://steamoracleaning.com.au",
-    "telephone": "0426 000 000",
+    "image": `${BASE_URL}/android-chrome-512x512.png`,
+    "url": BASE_URL,
+    "telephone": COMPANY_INFO.phone,
+    "email": COMPANY_INFO.email,
+    "priceRange": "$$",
     "address": {
       "@type": "PostalAddress",
+      "streetAddress": "120 Collins Street",
       "addressLocality": "Melbourne",
       "addressRegion": "VIC",
+      "postalCode": "3000",
       "addressCountry": "AU"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -37.8136,
+      "longitude": 144.9631
+    },
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        "opens": "07:00",
+        "closes": "19:00"
+      }
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": COMPANY_INFO.ratings.stars.toString(),
+      "reviewCount": COMPANY_INFO.ratings.totalReviews.toString(),
+      "bestRating": "5",
+      "worstRating": "1"
     }
   };
 };
 
-const generateServiceSchema = (serviceName: string, serviceUrl: string, description: string) => {
-  const base = generateBaseSchema();
+const generateServiceSchema = (
+  serviceName: string, 
+  serviceUrl: string, 
+  description: string,
+  image?: string,
+  price?: number,
+  priceFormatted?: string
+) => {
+  const imageUrl = image 
+    ? (image.startsWith('http') ? image : `${BASE_URL}${image}`)
+    : `${BASE_URL}/android-chrome-512x512.png`;
+
   return {
-    ...base,
-    "service": {
-      "@type": "Service",
-      "serviceType": serviceName,
-      "url": serviceUrl,
-      "description": description,
-      "provider": {
-        "@type": "LocalBusiness",
-        "name": "STEAMORA Cleaning"
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": `${serviceName} Melbourne`,
+    "serviceType": serviceName,
+    "url": serviceUrl,
+    "description": description,
+    "image": imageUrl,
+    "provider": {
+      "@type": "CleaningService",
+      "name": "STEAMORA Cleaning",
+      "url": BASE_URL,
+      "telephone": COMPANY_INFO.phone,
+      "email": COMPANY_INFO.email,
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "120 Collins Street",
+        "addressLocality": "Melbourne",
+        "addressRegion": "VIC",
+        "postalCode": "3000",
+        "addressCountry": "AU"
       }
-    }
+    },
+    "areaServed": {
+      "@type": "City",
+      "name": "Melbourne"
+    },
+    ...(price ? {
+      "offers": {
+        "@type": "Offer",
+        "price": price.toString(),
+        "priceCurrency": "AUD",
+        "description": priceFormatted || `From $${price}`,
+        "availability": "https://schema.org/InStock",
+        "url": serviceUrl
+      }
+    } : {})
   };
 };
 
@@ -297,8 +432,12 @@ export function updatePageSeo(
   }
 
   // 4. Update Open Graph Meta Tags
+  setMetaTag('property', 'og:site_name', 'STEAMORA Cleaning');
+  setMetaTag('property', 'og:type', 'website');
+  setMetaTag('property', 'og:locale', 'en_AU');
   setMetaTag('property', 'og:title', resolvedSeo.ogTitle || resolvedSeo.title);
   setMetaTag('property', 'og:description', resolvedSeo.ogDescription || resolvedSeo.description);
+
   if (resolvedSeo.canonicalPath) {
     const fullUrl = resolvedSeo.canonicalPath.startsWith('http') 
       ? resolvedSeo.canonicalPath 
@@ -307,18 +446,48 @@ export function updatePageSeo(
     setCanonicalUrl(resolvedSeo.canonicalPath);
   }
 
+  const socialImage = resolvedSeo.ogImage 
+    ? (resolvedSeo.ogImage.startsWith('http') ? resolvedSeo.ogImage : `${BASE_URL}${resolvedSeo.ogImage}`)
+    : `${BASE_URL}/android-chrome-512x512.png`;
+  setMetaTag('property', 'og:image', socialImage);
+
   // 5. Update Twitter Card Meta Tags
+  setMetaTag('name', 'twitter:card', 'summary_large_image');
   setMetaTag('name', 'twitter:title', resolvedSeo.ogTitle || resolvedSeo.title);
   setMetaTag('name', 'twitter:description', resolvedSeo.ogDescription || resolvedSeo.description);
+  setMetaTag('name', 'twitter:image', socialImage);
 
   // 6. Update Structured Data
-  if (resolvedSeo.canonicalPath && resolvedSeo.canonicalPath !== '/' && !resolvedSeo.canonicalPath.includes('suburbs') && !resolvedSeo.canonicalPath.includes('service-areas')) {
-     const serviceName = resolvedSeo.title.split('|')[0].trim();
-     setStructuredData(generateServiceSchema(serviceName, `https://steamoracleaning.com.au${resolvedSeo.canonicalPath}`, resolvedSeo.description));
+  if (resolvedSeo.serviceData && resolvedSeo.canonicalPath) {
+    const fullServiceUrl = `${BASE_URL}${resolvedSeo.canonicalPath}`;
+    setStructuredData(
+      generateServiceSchema(
+        resolvedSeo.serviceData.name,
+        fullServiceUrl,
+        resolvedSeo.description,
+        resolvedSeo.serviceData.image,
+        resolvedSeo.serviceData.price,
+        resolvedSeo.serviceData.priceFormatted
+      )
+    );
+  } else if (
+    resolvedSeo.canonicalPath && 
+    resolvedSeo.canonicalPath !== '/' && 
+    !resolvedSeo.canonicalPath.includes('suburbs') && 
+    !resolvedSeo.canonicalPath.includes('service-areas')
+  ) {
+    const serviceName = resolvedSeo.title.split('|')[0].trim();
+    setStructuredData(
+      generateServiceSchema(
+        serviceName,
+        `${BASE_URL}${resolvedSeo.canonicalPath}`,
+        resolvedSeo.description,
+        resolvedSeo.ogImage
+      )
+    );
   } else {
-     setStructuredData(generateBaseSchema());
+    setStructuredData(generateBaseSchema());
   }
-
 
   return resolvedSeo;
 }

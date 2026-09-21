@@ -23,7 +23,14 @@ interface ServiceDetailPageProps {
 }
 
 export default function ServiceDetailPage({ serviceSlug, onNavigate, onOpenQuoteModal }: ServiceDetailPageProps) {
-  const service = SERVICES.find(s => s.id.startsWith(serviceSlug)) || SERVICES[0];
+  const cleanSlug = (serviceSlug || '').toLowerCase().trim();
+  const service = SERVICES.find(s => 
+    s.id === cleanSlug || 
+    s.id === `${cleanSlug}-cleaning` ||
+    s.id.startsWith(cleanSlug) || 
+    cleanSlug.startsWith(s.id) ||
+    cleanSlug.includes(s.id.split('-')[0])
+  ) || SERVICES[0];
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
   const handlePhoneClick = () => {
