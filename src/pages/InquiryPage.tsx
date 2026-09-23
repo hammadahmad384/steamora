@@ -3,6 +3,8 @@ import { COMPANY_INFO, trackConversion } from '../data/config';
 import { MELBOURNE_SUBURBS } from '../data/suburbsData';
 import { SERVICES } from '../data/servicesData';
 import WhatsAppIcon from '../components/ui/WhatsAppIcon';
+import { saveLead } from '../utils/leadStorage';
+import { dispatchQuoteToOwnerEmail } from '../utils/emailDispatch';
 import {
   Send,
   Mail,
@@ -136,6 +138,28 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
       'inquiry_submit',
       `Customer Inquiry: ${dataToSubmit.name} (${dataToSubmit.area}) - ${dataToSubmit.service}`
     );
+
+    saveLead({
+      type: 'inquiry',
+      name: dataToSubmit.name,
+      phone: dataToSubmit.phone,
+      email: dataToSubmit.email,
+      suburb: dataToSubmit.area,
+      service: dataToSubmit.service,
+      details: `Preferred Time: ${dataToSubmit.time}${dataToSubmit.message ? ` | Notes: ${dataToSubmit.message}` : ''}`
+    });
+
+    // Automatically send notification email directly to steamoracleaning@gmail.com
+    dispatchQuoteToOwnerEmail({
+      name: dataToSubmit.name,
+      phone: dataToSubmit.phone,
+      email: dataToSubmit.email,
+      suburb: dataToSubmit.area,
+      service: dataToSubmit.service,
+      details: dataToSubmit.message,
+      preferredTime: dataToSubmit.time,
+      source: 'Steamora Customer Inquiry Form'
+    });
 
     setIsSubmitted(true);
 

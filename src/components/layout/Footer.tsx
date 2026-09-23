@@ -14,15 +14,17 @@ import {
   Sparkles,
   Facebook,
   Instagram,
-  Linkedin
+  Linkedin,
+  Inbox
 } from 'lucide-react';
 
 interface FooterProps {
   onNavigate: (route: PageRoute, params?: any) => void;
   onOpenQuoteModal: () => void;
+  onOpenOwnerLeads?: () => void;
 }
 
-export default function Footer({ onNavigate, onOpenQuoteModal }: FooterProps) {
+export default function Footer({ onNavigate, onOpenQuoteModal, onOpenOwnerLeads }: FooterProps) {
   return (
     <footer className="bg-slate-950 text-slate-400 pt-16 pb-28 lg:pb-12 border-t border-slate-800">
       {/* Pre-Footer Action Banner */}
@@ -293,7 +295,7 @@ export default function Footer({ onNavigate, onOpenQuoteModal }: FooterProps) {
           <div>
             © 2026 Steamora Cleaning Services Pty Ltd. All Rights Reserved. Melbourne, Victoria, Australia.
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6">
             <button onClick={() => onNavigate('faq')} className="hover:text-slate-300 transition-colors">
               Privacy Policy
             </button>
@@ -303,6 +305,16 @@ export default function Footer({ onNavigate, onOpenQuoteModal }: FooterProps) {
             <button onClick={() => onNavigate('contact')} className="hover:text-slate-300 transition-colors">
               Melbourne Dispatch
             </button>
+            {onOpenOwnerLeads && (
+              <button 
+                onClick={onOpenOwnerLeads} 
+                className="text-teal-400 hover:text-teal-300 transition-colors flex items-center gap-1 font-semibold border-l border-slate-800 pl-4"
+                title="View customer submitted quotes & bookings"
+              >
+                <Inbox className="w-3.5 h-3.5" />
+                <span>Owner Leads Portal</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

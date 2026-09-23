@@ -60,5 +60,23 @@ export const FAQS: FaqItem[] = [
     category: 'Carpet',
     question: 'Does your cleaning comply with Melbourne rental bond refund requirements?',
     answer: 'Yes! Steamora is a trusted choice for Melbourne renters and property managers. We provide official itemized digital tax receipts stating thermal hot-water extraction and sanitisation, meeting 100% of REIV (Real Estate Institute of Victoria) end-of-lease tenancy requirements.'
+  },
+  {
+    id: 'faq-11',
+    category: 'Stains',
+    question: 'Can steam cleaning remove tough stains like red wine, coffee, and pet urine?',
+    answer: 'Yes. Steamora uses targeted bio-enzymatic pre-treatments specifically formulated for organic and tannin stains such as red wine, coffee, tea, pet urine, blood, oil, and grease. Our industrial 210°F thermal extraction breaks the chemical bond between the stain and the fibers. We achieve a 95%+ success rate on stubborn household spots without damaging delicate fabric dyes.'
+  },
+  {
+    id: 'faq-12',
+    category: 'Process',
+    question: 'What is the difference between steam cleaning and dry cleaning?',
+    answer: 'Dry cleaning only cleans the top surface fibers using solvent-soaked pads. Steam cleaning (hot water extraction) is the method recommended by carpet manufacturers and Australian Standards AS/NZS 3733. It injects pressurized 210°F water deep into the pile to dissolve trapped dirt, allergens, and bacteria, then extracts 95% of moisture with high-power industrial vacuums, leaving carpets genuinely deep-cleaned.'
+  },
+  {
+    id: 'faq-13',
+    category: 'General',
+    question: 'How often should carpets and upholstery be professionally steam cleaned?',
+    answer: 'For typical residential homes, deep steam cleaning is recommended every 12 to 18 months to protect carpet warranties and remove accumulated allergens. Homes with active pets, toddlers, or asthma sufferers benefit from cleaning every 6 to 12 months. High-traffic commercial offices should be cleaned every 3 to 6 months.'
   }
 ];

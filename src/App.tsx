@@ -7,6 +7,7 @@ import QuoteModal from './components/ui/QuoteModal';
 import WhatsAppButton from './components/ui/WhatsAppButton';
 import SteamoraAssistant from './components/ui/SteamoraAssistant';
 import ConversionToast from './components/ui/ConversionToast';
+import OwnerLeadsModal from './components/ui/OwnerLeadsModal';
 import { updatePageSeo } from './utils/seo';
 
 // Route-based Code Splitting via React.lazy for optimized initial load
@@ -70,11 +71,16 @@ export default function App() {
   const [currentRoute, setCurrentRoute] = useState<PageRoute>('home');
   const [routeParam, setRouteParam] = useState<string>('');
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [isOwnerLeadsOpen, setIsOwnerLeadsOpen] = useState(false);
   const [quoteServiceTarget, setQuoteServiceTarget] = useState<string | undefined>(undefined);
 
   // Handle initial URL mapping and popstate
   useEffect(() => {
     const handleLocationChange = () => {
+      const searchParams = new URLSearchParams(window.location.search);
+      if (searchParams.get('admin') === 'leads' || searchParams.get('leads') === '1' || window.location.hash === '#leads') {
+        setIsOwnerLeadsOpen(true);
+      }
       const { route, param } = mapPathToRoute(window.location.pathname);
       setCurrentRoute(route);
       setRouteParam(param);
@@ -315,6 +321,7 @@ export default function App() {
       <Footer
         onNavigate={handleNavigate}
         onOpenQuoteModal={handleOpenQuoteModal}
+        onOpenOwnerLeads={() => setIsOwnerLeadsOpen(true)}
       />
 
       {/* Mobile-first bottom sticky CTA bar */}
@@ -327,6 +334,12 @@ export default function App() {
         isOpen={isQuoteModalOpen}
         onClose={handleCloseQuoteModal}
         service={quoteServiceTarget}
+      />
+
+      {/* Owner Dispatch & Incoming Leads Drawer / Modal */}
+      <OwnerLeadsModal
+        isOpen={isOwnerLeadsOpen}
+        onClose={() => setIsOwnerLeadsOpen(false)}
       />
 
       {/* WhatsApp Conversion Floating Widget */}

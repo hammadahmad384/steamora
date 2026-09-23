@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageRoute } from '../types';
 import { FAQS } from '../data/faqsData';
 import { COMPANY_INFO } from '../data/config';
-import { ChevronDown, Search, HelpCircle, Phone, Calendar, Sparkles } from 'lucide-react';
+import { ChevronDown, Search, HelpCircle, Phone, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface FaqPageProps {
   onNavigate: (route: PageRoute) => void;
@@ -13,6 +13,38 @@ export default function FaqPage({ onNavigate, onOpenQuoteModal }: FaqPageProps) 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [openFaq, setOpenFaq] = useState<string | null>('faq-1');
+
+  // Inject Schema.org FAQPage JSON-LD markup to boost Google search engine visibility and rich snippets
+  useEffect(() => {
+    const faqSchema = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": FAQS.map((faq) => ({
+        "@type": "Question",
+        "name": faq.question,
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": faq.answer
+        }
+      }))
+    };
+
+    let script = document.getElementById('faq-schema-jsonld') as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = 'faq-schema-jsonld';
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(faqSchema, null, 2);
+
+    return () => {
+      const existingScript = document.getElementById('faq-schema-jsonld');
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, []);
 
   const filteredFaqs = FAQS.filter(faq => {
     const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -36,8 +68,13 @@ export default function FaqPage({ onNavigate, onOpenQuoteModal }: FaqPageProps) 
           </h1>
 
           <p className="text-slate-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Find immediate answers on steam cleaning rates, drying times, pet safety, end-of-lease bond compliance, and Melbourne parking logistics.
+            Find immediate answers on steam cleaning rates, drying times, stain removal, pet safety, end-of-lease bond compliance, and Melbourne logistics.
           </p>
+
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-[11px] text-teal-400 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5 text-teal-400" />
+            <span>Schema.org FAQPage Structured Data Verified for Search Engines</span>
+          </div>
 
           {/* FAQ Search Bar */}
           <div className="max-w-md mx-auto mt-6 relative">
@@ -46,7 +83,7 @@ export default function FaqPage({ onNavigate, onOpenQuoteModal }: FaqPageProps) 
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by keyword (e.g. drying time, pet urine, bond)..."
+              placeholder="Search by keyword (e.g. drying time, pet urine, bond, stains)..."
               className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs sm:text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500"
             />
           </div>
@@ -61,16 +98,17 @@ export default function FaqPage({ onNavigate, onOpenQuoteModal }: FaqPageProps) 
             { id: 'all', label: 'All Questions' },
             { id: 'pricing', label: 'Pricing & Cost' },
             { id: 'process', label: 'Process & Drying' },
+            { id: 'stains', label: 'Stain Removal' },
             { id: 'safety', label: 'Pet & Child Safety' },
-            { id: 'service', label: 'Bookings & Locations' },
-            { id: 'commercial', label: 'Commercial & Bond' }
+            { id: 'carpet', label: 'Carpets & Bond Back' },
+            { id: 'commercial', label: 'Commercial' }
           ].map(cat => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
                 selectedCategory === cat.id
-                  ? 'bg-slate-900 text-white'
+                  ? 'bg-slate-900 text-white shadow-sm'
                   : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
               }`}
             >

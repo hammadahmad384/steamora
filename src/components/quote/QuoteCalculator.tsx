@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { trackConversion, COMPANY_INFO } from '../../data/config';
 import { MELBOURNE_SUBURBS } from '../../data/suburbsData';
-import { CheckCircle2, Calculator, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { CheckCircle2, Calculator, ArrowRight, ShieldCheck, Sparkles, Mail, Phone } from 'lucide-react';
+import WhatsAppIcon from '../ui/WhatsAppIcon';
+import { saveLead } from '../../utils/leadStorage';
+import { dispatchQuoteToOwnerEmail } from '../../utils/emailDispatch';
 
 interface QuoteCalculatorProps {
   initialService?: string;
@@ -31,6 +34,7 @@ export default function QuoteCalculator({
   const [isCustomSuburb, setIsCustomSuburb] = useState(false);
   const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isEmailDispatched, setIsEmailDispatched] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Dynamic price calculation estimate
@@ -102,9 +106,87 @@ export default function QuoteCalculator({
       estimatedPriceMin
     );
 
+    // Save lead record for owner access & persistence
+    saveLead({
+      type: 'quote',
+      name: formData.fullName,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      estimatedPrice: `${estimatedPriceMin} - ${estimatedPriceMax}`,
+      details: `Rooms: ${formData.roomsCount}, Property: ${formData.propertyType}, Stains: ${formData.hasStains ? 'Yes' : 'No'}, Pet Odour: ${formData.hasPetOdour ? 'Yes' : 'No'}${formData.message ? ` | Notes: ${formData.message}` : ''}`
+    });
+
+    // Automatically send notification email directly to steamoracleaning@gmail.com
+    dispatchQuoteToOwnerEmail({
+      name: formData.fullName,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      estimatedPrice: `${estimatedPriceMin} – ${estimatedPriceMax}`,
+      propertyType: formData.propertyType,
+      roomsCount: formData.roomsCount,
+      hasStains: formData.hasStains,
+      hasPetOdour: formData.hasPetOdour,
+      details: formData.message,
+      source: 'Steamora Free Quote Calculator'
+    }).then((res) => {
+      if (res.success) {
+        setIsEmailDispatched(true);
+      }
+    });
+
     setFormData(prev => ({ ...prev, suburb: resolvedSuburb }));
     setIsSubmitted(true);
     if (onSuccess) onSuccess();
+  };
+
+  const getQuoteWhatsAppUrl = () => {
+    const text = [
+      `*🔔 New STEAMORA Quote Submission*`,
+      `---------------------------------`,
+      `*Customer:* ${formData.fullName}`,
+      `*Phone:* ${formData.phone}`,
+      `*Email:* ${formData.email}`,
+      `*Suburb:* ${formData.suburb} (VIC)`,
+      `*Service:* ${formData.service.replace(/-/g, ' ')}`,
+      `*Property:* ${formData.propertyType}`,
+      `*Rooms:* ${formData.roomsCount}`,
+      `*Estimated Range:* $${estimatedPriceMin} – $${estimatedPriceMax} AUD`,
+      formData.hasStains ? `*Stain Treatment Needed:* Yes` : null,
+      formData.hasPetOdour ? `*Pet Odour / Sanitisation:* Yes` : null,
+      formData.message?.trim() ? `*Notes:* ${formData.message.trim()}` : null,
+      `---------------------------------`,
+      `Submitted via Steamora Free Quote Calculator`
+    ].filter(Boolean).join('\n');
+
+    const cleanNumber = COMPANY_INFO.whatsapp.number.replace(/[^0-9]/g, '');
+    return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+  };
+
+  const getQuoteMailtoUrl = () => {
+    const subject = `Steam Cleaning Quote Request - ${formData.fullName} (${formData.suburb}) - $${estimatedPriceMin}-$${estimatedPriceMax}`;
+    const body = [
+      `Hi Steamora Dispatch,`,
+      ``,
+      `A new customer quote has been submitted on steamora.com.au:`,
+      ``,
+      `• Customer Name: ${formData.fullName}`,
+      `• Phone: ${formData.phone}`,
+      `• Email: ${formData.email}`,
+      `• Suburb: ${formData.suburb}`,
+      `• Service: ${formData.service}`,
+      `• Estimated Price: $${estimatedPriceMin} – $${estimatedPriceMax} AUD`,
+      `• Property Type: ${formData.propertyType}`,
+      `• Rooms: ${formData.roomsCount}`,
+      `• Specific Notes: ${formData.message || 'None'}`,
+      ``,
+      `Timestamp: ${new Date().toLocaleString()}`
+    ].join('\n');
+
+    return `mailto:${COMPANY_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   if (isSubmitted) {
@@ -123,7 +205,7 @@ export default function QuoteCalculator({
           We’ve received your quote request for your <span className="font-semibold text-slate-900">{formData.suburb}</span> property. A member of the Steamora Melbourne team will contact you within 15 minutes with your confirmed fixed quote.
         </p>
 
-        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 max-w-md mx-auto text-left mb-6">
+        <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 max-w-md mx-auto text-left mb-4">
           <div className="text-xs uppercase tracking-wider font-bold text-slate-600 mb-2">
             Quote Reference Summary
           </div>
@@ -135,17 +217,57 @@ export default function QuoteCalculator({
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+        {/* Dispatch Notification Status */}
+        <div className="bg-emerald-50/90 border border-emerald-200/80 rounded-xl p-3 max-w-md mx-auto text-xs text-emerald-900 flex items-center justify-center gap-2 mb-6 text-left">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>
+            {isEmailDispatched ? (
+              <>Email dispatched directly to <strong>{COMPANY_INFO.email}</strong></>
+            ) : (
+              <>Quote recorded & dispatched to <strong>{COMPANY_INFO.email}</strong></>
+            )}
+          </span>
+        </div>
+
+        {/* Real-time Dispatch Actions */}
+        <div className="space-y-3 max-w-md mx-auto mb-6">
+          <p className="text-xs text-slate-500 font-medium">
+            Connect immediately with our Melbourne dispatch team:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <a
+              href={getQuoteWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackConversion('whatsapp_click', 'Quote Confirmation WhatsApp')}
+              className="px-4 py-3 bg-[#25D366] hover:bg-[#1EBE5D] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+            >
+              <WhatsAppIcon className="w-4 h-4 fill-white" />
+              <span>Send via WhatsApp</span>
+            </a>
+            <a
+              href={getQuoteMailtoUrl()}
+              onClick={() => trackConversion('quote_form_submit', 'Quote Confirmation Email Click')}
+              className="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 transition-all hover:scale-[1.02]"
+            >
+              <Mail className="w-4 h-4 text-teal-400" />
+              <span>Send to {COMPANY_INFO.email}</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2 border-t border-slate-100">
           <a
             href={`tel:${COMPANY_INFO.phoneTel}`}
             onClick={() => trackConversion('phone_call_click', 'Quote Success Call')}
-            className="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10"
+            className="w-full sm:w-auto px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors"
           >
+            <Phone className="w-3.5 h-3.5 text-teal-600" />
             <span>Call Melbourne Dispatch ({COMPANY_INFO.phone})</span>
           </a>
           <button
             onClick={() => setIsSubmitted(false)}
-            className="w-full sm:w-auto px-5 py-3 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold text-sm"
+            className="w-full sm:w-auto px-4 py-2.5 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl font-semibold text-xs transition-colors"
           >
             Submit Another Quote
           </button>

@@ -3,6 +3,8 @@ import { PageRoute } from '../types';
 import { COMPANY_INFO, trackConversion } from '../data/config';
 import { MELBOURNE_SUBURBS } from '../data/suburbsData';
 import WhatsAppIcon from '../components/ui/WhatsAppIcon';
+import { saveLead } from '../utils/leadStorage';
+import { dispatchQuoteToOwnerEmail } from '../utils/emailDispatch';
 import { 
   Phone, 
   Mail, 
@@ -58,6 +60,27 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
       'quote_form_submit',
       `Contact Enquiry: ${formData.name} (${resolvedSuburb}) - ${formData.service}`
     );
+
+    saveLead({
+      type: 'contact',
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      details: formData.message || 'General contact enquiry'
+    });
+
+    // Automatically send notification email directly to steamoracleaning@gmail.com
+    dispatchQuoteToOwnerEmail({
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      details: formData.message,
+      source: 'Steamora Melbourne Contact Form'
+    });
 
     setIsSubmitted(true);
   };

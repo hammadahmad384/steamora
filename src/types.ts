@@ -72,7 +72,7 @@ export interface CustomerReview {
 
 export interface FaqItem {
   id: string;
-  category: 'General' | 'Carpet' | 'Upholstery' | 'Pricing' | 'Commercial';
+  category: 'General' | 'Carpet' | 'Upholstery' | 'Pricing' | 'Commercial' | 'Stains' | 'Process';
   question: string;
   answer: string;
 }

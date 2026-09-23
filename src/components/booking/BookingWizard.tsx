@@ -13,8 +13,12 @@ import {
   Phone,
   Building,
   Car,
-  Check
+  Check,
+  Mail
 } from 'lucide-react';
+import WhatsAppIcon from '../ui/WhatsAppIcon';
+import { saveLead } from '../../utils/leadStorage';
+import { dispatchQuoteToOwnerEmail } from '../../utils/emailDispatch';
 
 export default function BookingWizard() {
   const [step, setStep] = useState(1);
@@ -117,7 +121,81 @@ export default function BookingWizard() {
       totalPrice
     );
 
+    // Save lead record in local dispatch storage
+    saveLead({
+      type: 'booking',
+      name: fullName,
+      phone: phone,
+      email: email,
+      suburb: suburb,
+      service: serviceId,
+      estimatedPrice: totalPrice,
+      details: `Address: ${streetAddress}, ${suburb} | Date: ${preferredDate} (${timeSlot}) | Property: ${propertyType} | Parking: ${parking} | Lift: ${hasLift ? 'Yes' : 'No'}${specialInstructions ? ` | Notes: ${specialInstructions}` : ''}`
+    });
+
+    // Automatically send notification email directly to steamoracleaning@gmail.com
+    dispatchQuoteToOwnerEmail({
+      name: fullName,
+      phone: phone,
+      email: email,
+      suburb: suburb,
+      service: serviceId,
+      estimatedPrice: totalPrice,
+      propertyType: propertyType,
+      roomsCount: roomsCount,
+      preferredDate: preferredDate,
+      preferredTime: timeSlot,
+      details: `Street: ${streetAddress} | Parking: ${parking} | Lift: ${hasLift ? 'Yes' : 'No'}${specialInstructions ? ` | Instructions: ${specialInstructions}` : ''}`,
+      source: 'Steamora Online Booking Wizard'
+    });
+
     setIsConfirmed(true);
+  };
+
+  const getBookingWhatsAppUrl = () => {
+    const text = [
+      `*📅 New STEAMORA Direct Booking Request*`,
+      `---------------------------------`,
+      `*Customer:* ${fullName}`,
+      `*Phone:* ${phone}`,
+      `*Email:* ${email}`,
+      `*Address:* ${streetAddress}, ${suburb} VIC`,
+      `*Service:* ${serviceId.replace(/-/g, ' ')}`,
+      `*Preferred Date:* ${preferredDate}`,
+      `*Time Window:* ${timeSlot}`,
+      `*Estimated Total:* $${totalPrice} AUD`,
+      `*Property:* ${propertyType}`,
+      `*Parking:* ${parking}`,
+      specialInstructions?.trim() ? `*Special Notes:* ${specialInstructions.trim()}` : null,
+      `---------------------------------`,
+      `Submitted via Steamora Online Booking Scheduler`
+    ].filter(Boolean).join('\n');
+
+    const cleanNumber = COMPANY_INFO.whatsapp.number.replace(/[^0-9]/g, '');
+    return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
+  };
+
+  const getBookingMailtoUrl = () => {
+    const subject = `New Steamora Booking Confirmation - ${fullName} (${suburb}) - ${preferredDate}`;
+    const body = [
+      `Hi Steamora Dispatch Team,`,
+      ``,
+      `A new online booking has been submitted:`,
+      ``,
+      `• Customer: ${fullName}`,
+      `• Phone: ${phone}`,
+      `• Email: ${email}`,
+      `• Address: ${streetAddress}, ${suburb} VIC`,
+      `• Service: ${serviceId}`,
+      `• Preferred Date: ${preferredDate} (${timeSlot})`,
+      `• Estimated Total: $${totalPrice} AUD`,
+      `• Property Type: ${propertyType} (Parking: ${parking}, Lift: ${hasLift ? 'Yes' : 'No'})`,
+      `• Special Notes: ${specialInstructions || 'None'}`,
+      ``,
+      `Timestamp: ${new Date().toLocaleString()}`
+    ].join('\n');
+
+    return `mailto:${COMPANY_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   if (isConfirmed) {
@@ -137,7 +215,7 @@ export default function BookingWizard() {
         </p>
 
         {/* Confirmed Details Card */}
-        <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-6 text-left max-w-xl mx-auto mb-8 space-y-3">
+        <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-6 text-left max-w-xl mx-auto mb-6 space-y-3">
           <div className="flex items-center justify-between pb-3 border-b border-slate-200">
             <div>
               <span className="text-xs text-slate-600 uppercase font-semibold">Service</span>
@@ -171,13 +249,39 @@ export default function BookingWizard() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        {/* Instant Dispatch Actions */}
+        <div className="space-y-3 max-w-xl mx-auto mb-8">
+          <p className="text-xs text-slate-500 font-medium">
+            Connect directly with Steamora Melbourne dispatch:
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <a
+              href={getBookingWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackConversion('whatsapp_click', 'Booking Confirmation WhatsApp')}
+              className="px-5 py-3.5 bg-[#25D366] hover:bg-[#1EBE5D] text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-500/20 transition-all hover:scale-[1.02]"
+            >
+              <WhatsAppIcon className="w-4 h-4 fill-white" />
+              <span>Send via WhatsApp</span>
+            </a>
+            <a
+              href={getBookingMailtoUrl()}
+              className="px-5 py-3.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 transition-all hover:scale-[1.02]"
+            >
+              <Mail className="w-4 h-4 text-teal-400" />
+              <span>Send Email to Dispatch</span>
+            </a>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 border-t border-slate-100">
           <a
             href={`tel:${COMPANY_INFO.phoneTel}`}
             onClick={() => trackConversion('phone_call_click', 'Booking Confirmation Call')}
-            className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/15"
+            className="w-full sm:w-auto px-6 py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-colors"
           >
-            <Phone className="w-4 h-4 text-teal-400" />
+            <Phone className="w-3.5 h-3.5 text-teal-600" />
             <span>Call Dispatch ({COMPANY_INFO.phone})</span>
           </a>
           <button
@@ -185,7 +289,7 @@ export default function BookingWizard() {
               setIsConfirmed(false);
               setStep(1);
             }}
-            className="w-full sm:w-auto px-6 py-4 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold text-sm"
+            className="w-full sm:w-auto px-5 py-3 border border-slate-200 hover:bg-slate-50 text-slate-600 rounded-xl font-semibold text-xs transition-colors"
           >
             Make Another Booking
           </button>

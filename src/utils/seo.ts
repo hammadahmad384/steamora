@@ -3,6 +3,7 @@ import { PageRoute } from '../types';
 import { SERVICES } from '../data/servicesData';
 import { MELBOURNE_SUBURBS } from '../data/suburbsData';
 import { COMPANY_INFO } from '../data/config';
+import { FAQS } from '../data/faqsData';
 
 export interface PageSeoConfig {
   title: string;
@@ -289,18 +290,48 @@ function setCanonicalUrl(canonicalPath: string) {
 
 
 /**
- * Helper to update or create the JSON-LD structured data script.
+ * Helper to update or create a JSON-LD structured data script.
  */
-function setStructuredData(schema: object) {
+export function setStructuredData(schema: object, id: string = 'schema-dynamic-jsonld') {
   if (typeof document === 'undefined') return;
-  let script = document.querySelector('script[type="application/ld+json"]') as HTMLScriptElement | null;
+  let script = document.getElementById(id) as HTMLScriptElement | null;
   if (!script) {
     script = document.createElement('script');
+    script.id = id;
     script.setAttribute('type', 'application/ld+json');
     document.head.appendChild(script);
   }
-  script.textContent = JSON.stringify(schema);
+  script.textContent = JSON.stringify(schema, null, 2);
 }
+
+/**
+ * Helper to remove a structured data script by ID.
+ */
+export function removeStructuredData(id: string) {
+  if (typeof document === 'undefined') return;
+  const script = document.getElementById(id);
+  if (script) {
+    script.remove();
+  }
+}
+
+/**
+ * Generates Schema.org FAQPage JSON-LD structured data for search engine visibility.
+ */
+export const generateFaqSchema = () => {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": FAQS.map((faq) => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+};
 
 const generateBaseSchema = () => {
   return {
@@ -458,35 +489,41 @@ export function updatePageSeo(
   setMetaTag('name', 'twitter:image', socialImage);
 
   // 6. Update Structured Data
-  if (resolvedSeo.serviceData && resolvedSeo.canonicalPath) {
-    const fullServiceUrl = `${BASE_URL}${resolvedSeo.canonicalPath}`;
-    setStructuredData(
-      generateServiceSchema(
-        resolvedSeo.serviceData.name,
-        fullServiceUrl,
-        resolvedSeo.description,
-        resolvedSeo.serviceData.image,
-        resolvedSeo.serviceData.price,
-        resolvedSeo.serviceData.priceFormatted
-      )
-    );
-  } else if (
-    resolvedSeo.canonicalPath && 
-    resolvedSeo.canonicalPath !== '/' && 
-    !resolvedSeo.canonicalPath.includes('suburbs') && 
-    !resolvedSeo.canonicalPath.includes('service-areas')
-  ) {
-    const serviceName = resolvedSeo.title.split('|')[0].trim();
-    setStructuredData(
-      generateServiceSchema(
-        serviceName,
-        `${BASE_URL}${resolvedSeo.canonicalPath}`,
-        resolvedSeo.description,
-        resolvedSeo.ogImage
-      )
-    );
+  if (route === 'faq') {
+    setStructuredData(generateFaqSchema(), 'schema-faq-jsonld');
+    removeStructuredData('schema-dynamic-jsonld');
   } else {
-    setStructuredData(generateBaseSchema());
+    removeStructuredData('schema-faq-jsonld');
+    if (resolvedSeo.serviceData && resolvedSeo.canonicalPath) {
+      const fullServiceUrl = `${BASE_URL}${resolvedSeo.canonicalPath}`;
+      setStructuredData(
+        generateServiceSchema(
+          resolvedSeo.serviceData.name,
+          fullServiceUrl,
+          resolvedSeo.description,
+          resolvedSeo.serviceData.image,
+          resolvedSeo.serviceData.price,
+          resolvedSeo.serviceData.priceFormatted
+        )
+      );
+    } else if (
+      resolvedSeo.canonicalPath && 
+      resolvedSeo.canonicalPath !== '/' && 
+      !resolvedSeo.canonicalPath.includes('suburbs') && 
+      !resolvedSeo.canonicalPath.includes('service-areas')
+    ) {
+      const serviceName = resolvedSeo.title.split('|')[0].trim();
+      setStructuredData(
+        generateServiceSchema(
+          serviceName,
+          `${BASE_URL}${resolvedSeo.canonicalPath}`,
+          resolvedSeo.description,
+          resolvedSeo.ogImage
+        )
+      );
+    } else {
+      setStructuredData(generateBaseSchema());
+    }
   }
 
   return resolvedSeo;
