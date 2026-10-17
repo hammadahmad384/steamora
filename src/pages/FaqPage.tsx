@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { PageRoute } from '../types';
 import { FAQS } from '../data/faqsData';
 import { COMPANY_INFO } from '../data/config';
@@ -13,38 +13,6 @@ export default function FaqPage({ onNavigate, onOpenQuoteModal }: FaqPageProps) 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [openFaq, setOpenFaq] = useState<string | null>('faq-1');
-
-  // Inject Schema.org FAQPage JSON-LD markup to boost Google search engine visibility and rich snippets
-  useEffect(() => {
-    const faqSchema = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": FAQS.map((faq) => ({
-        "@type": "Question",
-        "name": faq.question,
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": faq.answer
-        }
-      }))
-    };
-
-    let script = document.getElementById('faq-schema-jsonld') as HTMLScriptElement | null;
-    if (!script) {
-      script = document.createElement('script');
-      script.id = 'faq-schema-jsonld';
-      script.type = 'application/ld+json';
-      document.head.appendChild(script);
-    }
-    script.textContent = JSON.stringify(faqSchema, null, 2);
-
-    return () => {
-      const existingScript = document.getElementById('faq-schema-jsonld');
-      if (existingScript) {
-        existingScript.remove();
-      }
-    };
-  }, []);
 
   const filteredFaqs = FAQS.filter(faq => {
     const matchesSearch = faq.question.toLowerCase().includes(searchQuery.toLowerCase()) || 

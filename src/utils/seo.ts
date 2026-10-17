@@ -337,10 +337,11 @@ const generateBaseSchema = () => {
   return {
     "@context": "https://schema.org",
     "@type": "CleaningService",
+    "@id": `${BASE_URL}/#cleaningservice`,
     "name": "STEAMORA Cleaning",
-    "image": `${BASE_URL}/android-chrome-512x512.png`,
+    "image": `${BASE_URL}/images/carpet-cleaning.webp`,
     "url": BASE_URL,
-    "telephone": COMPANY_INFO.phone,
+    "telephone": COMPANY_INFO.phoneDisplay,
     "email": COMPANY_INFO.email,
     "priceRange": "$$",
     "address": {
@@ -364,13 +365,25 @@ const generateBaseSchema = () => {
         "closes": "19:00"
       }
     ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": COMPANY_INFO.ratings.stars.toString(),
-      "reviewCount": COMPANY_INFO.ratings.totalReviews.toString(),
-      "bestRating": "5",
-      "worstRating": "1"
-    }
+    "areaServed": [
+      "Melbourne CBD",
+      "Richmond",
+      "South Yarra",
+      "Docklands",
+      "Southbank",
+      "St Kilda",
+      "Carlton",
+      "Brunswick",
+      "Hawthorn",
+      "Toorak",
+      "Fitzroy",
+      "Brighton"
+    ],
+    "sameAs": [
+      COMPANY_INFO.social.facebook,
+      COMPANY_INFO.social.instagram,
+      COMPANY_INFO.social.linkedin
+    ]
   };
 };
 
@@ -489,40 +502,49 @@ export function updatePageSeo(
   setMetaTag('name', 'twitter:image', socialImage);
 
   // 6. Update Structured Data
+  // Clean up any stale or legacy script tags
+  removeStructuredData('faq-schema-jsonld');
+  removeStructuredData('schema-faq-jsonld');
+
   if (route === 'faq') {
-    setStructuredData(generateFaqSchema(), 'schema-faq-jsonld');
-    removeStructuredData('schema-dynamic-jsonld');
+    setStructuredData(generateFaqSchema(), 'schema-dynamic-jsonld');
+  } else if (resolvedSeo.serviceData && resolvedSeo.canonicalPath) {
+    const fullServiceUrl = `${BASE_URL}${resolvedSeo.canonicalPath}`;
+    setStructuredData(
+      generateServiceSchema(
+        resolvedSeo.serviceData.name,
+        fullServiceUrl,
+        resolvedSeo.description,
+        resolvedSeo.serviceData.image,
+        resolvedSeo.serviceData.price,
+        resolvedSeo.serviceData.priceFormatted
+      ),
+      'schema-dynamic-jsonld'
+    );
+  } else if (
+    resolvedSeo.canonicalPath && 
+    resolvedSeo.canonicalPath !== '/' && 
+    !resolvedSeo.canonicalPath.includes('suburbs') && 
+    !resolvedSeo.canonicalPath.includes('service-areas')
+  ) {
+    const serviceName = resolvedSeo.title.split('|')[0].trim();
+    setStructuredData(
+      generateServiceSchema(
+        serviceName,
+        `${BASE_URL}${resolvedSeo.canonicalPath}`,
+        resolvedSeo.description,
+        resolvedSeo.ogImage
+      ),
+      'schema-dynamic-jsonld'
+    );
   } else {
-    removeStructuredData('schema-faq-jsonld');
-    if (resolvedSeo.serviceData && resolvedSeo.canonicalPath) {
-      const fullServiceUrl = `${BASE_URL}${resolvedSeo.canonicalPath}`;
-      setStructuredData(
-        generateServiceSchema(
-          resolvedSeo.serviceData.name,
-          fullServiceUrl,
-          resolvedSeo.description,
-          resolvedSeo.serviceData.image,
-          resolvedSeo.serviceData.price,
-          resolvedSeo.serviceData.priceFormatted
-        )
-      );
-    } else if (
-      resolvedSeo.canonicalPath && 
-      resolvedSeo.canonicalPath !== '/' && 
-      !resolvedSeo.canonicalPath.includes('suburbs') && 
-      !resolvedSeo.canonicalPath.includes('service-areas')
-    ) {
-      const serviceName = resolvedSeo.title.split('|')[0].trim();
-      setStructuredData(
-        generateServiceSchema(
-          serviceName,
-          `${BASE_URL}${resolvedSeo.canonicalPath}`,
-          resolvedSeo.description,
-          resolvedSeo.ogImage
-        )
-      );
+    // If the base business schema is already present in index.html (schema-business-jsonld),
+    // remove the dynamic schema to prevent duplicate CleaningService structured data on home page.
+    const staticBusinessSchema = document.getElementById('schema-business-jsonld');
+    if (staticBusinessSchema) {
+      removeStructuredData('schema-dynamic-jsonld');
     } else {
-      setStructuredData(generateBaseSchema());
+      setStructuredData(generateBaseSchema(), 'schema-dynamic-jsonld');
     }
   }
 
