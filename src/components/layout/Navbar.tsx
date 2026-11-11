@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { PageRoute } from '../../types';
+import InternalLink from '../ui/InternalLink';
+import { SERVICE_ROUTES } from '../../utils/routes';
 import { COMPANY_INFO, trackConversion } from '../../data/config';
 import { SERVICES } from '../../data/servicesData';
 import { MELBOURNE_SUBURBS } from '../../data/suburbsData';
@@ -102,24 +104,20 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
           {/* Logo */}
-          <button 
-            onClick={() => handleLinkClick('home')}
-            className="group focus:outline-none text-left"
+          <InternalLink href="/" route="home" onNavigate={handleLinkClick} className="group focus:outline-none text-left"
             aria-label="Steamora Home"
           >
             <Logo size="md" showTagline={true} />
-          </button>
+          </InternalLink>
 
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-700">
-            <button
-              onClick={() => handleLinkClick('home')}
-              className={`transition-colors hover:text-teal-600 ${
+            <InternalLink href="/" route="home" onNavigate={handleLinkClick} className={`transition-colors hover:text-teal-600 ${
                 currentRoute === 'home' ? 'text-teal-600 font-bold' : ''
               }`}
             >
               Home
-            </button>
+            </InternalLink>
 
             {/* Services Dropdown */}
             <div 
@@ -127,15 +125,13 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
               onMouseEnter={() => setServicesDropdown(true)}
               onMouseLeave={() => setServicesDropdown(false)}
             >
-              <button
-                onClick={() => handleLinkClick('services')}
-                className={`flex items-center gap-1 transition-colors hover:text-teal-600 ${
+              <InternalLink href="/services" route="services" onNavigate={handleLinkClick} className={`flex items-center gap-1 transition-colors hover:text-teal-600 ${
                   currentRoute.startsWith('service') && currentRoute !== 'service-areas' ? 'text-teal-600 font-bold' : ''
                 }`}
               >
                 <span>Services</span>
                 <ChevronDown className="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
+              </InternalLink>
 
               {servicesDropdown && (
                 <div className="absolute top-full left-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 py-3 px-2 mt-1 animate-in fade-in slide-in-from-top-2 duration-150">
@@ -143,9 +139,9 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
                     Professional Cleaning Services
                   </div>
                   {SERVICES.map((srv) => (
-                    <button
+                    <InternalLink href={SERVICE_ROUTES[srv.id].path} route={SERVICE_ROUTES[srv.id].route} onNavigate={handleLinkClick}
                       key={srv.id}
-                      onClick={() => handleLinkClick(`service-${srv.id.split('-')[0]}` as PageRoute)}
+                      
                       className="w-full text-left px-3 py-2.5 rounded-xl hover:bg-slate-50 transition-colors flex items-start gap-3 group/item"
                     >
                       <div className="w-2 h-2 rounded-full bg-teal-500 mt-1.5 shrink-0 group-hover/item:scale-125 transition-transform" />
@@ -157,29 +153,25 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
                           {srv.startingPrice} • {srv.tagline}
                         </div>
                       </div>
-                    </button>
+                    </InternalLink>
                   ))}
                   <div className="mt-2 pt-2 border-t border-slate-100 px-3">
-                    <button
-                      onClick={() => handleLinkClick('services')}
-                      className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center justify-between w-full"
+                    <InternalLink href="/services" route="services" onNavigate={handleLinkClick} className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center justify-between w-full"
                     >
                       <span>View All Services & Pricing</span>
                       <span>→</span>
-                    </button>
+                    </InternalLink>
                   </div>
                 </div>
               )}
             </div>
 
-            <button
-              onClick={() => handleLinkClick('about')}
-              className={`transition-colors hover:text-teal-600 ${
+            <InternalLink href="/about" route="about" onNavigate={handleLinkClick} className={`transition-colors hover:text-teal-600 ${
                 currentRoute === 'about' ? 'text-teal-600 font-bold' : ''
               }`}
             >
               About Us
-            </button>
+            </InternalLink>
 
             {/* Service Areas Dropdown */}
             <div 
@@ -187,15 +179,13 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
               onMouseEnter={() => setSuburbsDropdown(true)}
               onMouseLeave={() => setSuburbsDropdown(false)}
             >
-              <button
-                onClick={() => handleLinkClick('service-areas')}
-                className={`flex items-center gap-1 transition-colors hover:text-teal-600 ${
+              <InternalLink href="/service-areas" route="service-areas" onNavigate={handleLinkClick} className={`flex items-center gap-1 transition-colors hover:text-teal-600 ${
                   currentRoute === 'service-areas' || currentRoute === 'suburb-detail' ? 'text-teal-600 font-bold' : ''
                 }`}
               >
                 <span>Service Areas</span>
                 <ChevronDown className="w-4 h-4 text-slate-400 group-hover:rotate-180 transition-transform duration-200" />
-              </button>
+              </InternalLink>
 
               {suburbsDropdown && (
                 <div className="absolute top-full left-0 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-4 mt-1 animate-in fade-in slide-in-from-top-2 duration-150">
@@ -204,58 +194,47 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
                   </div>
                   <div className="grid grid-cols-2 gap-1.5">
                     {MELBOURNE_SUBURBS.slice(0, 8).map((sub) => (
-                      <button
-                        key={sub.slug}
-                        onClick={() => handleLinkClick('suburb-detail', sub.slug)}
+                      <InternalLink href={`/suburbs/${encodeURIComponent(sub.slug)}`} route="suburb-detail" param={sub.slug} onNavigate={handleLinkClick} key={sub.slug}
+                        
                         className="text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-50 text-xs font-medium text-slate-700 hover:text-teal-600 truncate"
                       >
                         {sub.name}
-                      </button>
+                      </InternalLink>
                     ))}
                   </div>
                   <div className="mt-3 pt-2 border-t border-slate-100">
-                    <button
-                      onClick={() => handleLinkClick('service-areas')}
-                      className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center justify-between w-full"
+                    <InternalLink href="/service-areas" route="service-areas" onNavigate={handleLinkClick} className="text-xs font-bold text-teal-600 hover:text-teal-700 flex items-center justify-between w-full"
                     >
                       <span>Explore All Melbourne Locations</span>
                       <span>→</span>
-                    </button>
+                    </InternalLink>
                   </div>
                 </div>
               )}
             </div>
 
-            <button
-              onClick={() => handleLinkClick('reviews')}
-              className={`transition-colors hover:text-teal-600 ${
+            <InternalLink href="/reviews" route="reviews" onNavigate={handleLinkClick} className={`transition-colors hover:text-teal-600 ${
                 currentRoute === 'reviews' ? 'text-teal-600 font-bold' : ''
               }`}
             >
               Reviews
-            </button>
+            </InternalLink>
 
-            <button
-              onClick={() => handleLinkClick('faq')}
-              className={`transition-colors hover:text-teal-600 ${
+            <InternalLink href="/faq" route="faq" onNavigate={handleLinkClick} className={`transition-colors hover:text-teal-600 ${
                 currentRoute === 'faq' ? 'text-teal-600 font-bold' : ''
               }`}
             >
               FAQ
-            </button>
+            </InternalLink>
 
-            <button
-              onClick={() => handleLinkClick('contact')}
-              className={`transition-colors hover:text-teal-600 ${
+            <InternalLink href="/contact" route="contact" onNavigate={handleLinkClick} className={`transition-colors hover:text-teal-600 ${
                 currentRoute === 'contact' ? 'text-teal-600 font-bold' : ''
               }`}
             >
               Contact
-            </button>
+            </InternalLink>
 
-            <button
-              onClick={() => handleLinkClick('inquiry')}
-              className={`relative px-3 py-1.5 rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 ${
+            <InternalLink href="/inquiry" route="inquiry" onNavigate={handleLinkClick} className={`relative px-3 py-1.5 rounded-xl font-bold transition-all text-xs flex items-center gap-1.5 ${
                 currentRoute === 'inquiry'
                   ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20'
                   : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200'
@@ -264,7 +243,7 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
               <WhatsAppIcon className={`w-3.5 h-3.5 ${currentRoute === 'inquiry' ? 'fill-white' : 'fill-[#25D366]'}`} />
               <span>Inquiry</span>
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            </button>
+            </InternalLink>
           </div>
 
           {/* Desktop Right CTAs */}
@@ -281,13 +260,11 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
               <span>WhatsApp</span>
             </a>
 
-            <button
-              onClick={() => handleLinkClick('book-online')}
-              className="px-4 py-2.5 rounded-xl border border-slate-300 hover:border-slate-400 text-slate-800 font-bold text-xs flex items-center gap-1.5 hover:bg-slate-50 transition-colors"
+            <InternalLink href="/book-online" route="book-online" onNavigate={handleLinkClick} className="px-4 py-2.5 rounded-xl border border-slate-300 hover:border-slate-400 text-slate-800 font-bold text-xs flex items-center gap-1.5 hover:bg-slate-50 transition-colors"
             >
               <Calendar className="w-3.5 h-3.5 text-teal-600" />
               <span>Book Online</span>
-            </button>
+            </InternalLink>
 
             <button
               onClick={() => onOpenQuoteModal()}
@@ -335,58 +312,42 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
         {mobileMenuOpen && (
           <div className="lg:hidden bg-white border-b border-slate-200 px-4 pt-3 pb-6 space-y-3 animate-in fade-in slide-in-from-top-3 duration-200 shadow-xl">
             <div className="grid grid-cols-2 gap-2 pb-3 border-b border-slate-100">
-              <button
-                onClick={() => handleLinkClick('home')}
-                className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
+              <InternalLink href="/" route="home" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
               >
                 Home
-              </button>
-              <button
-                onClick={() => handleLinkClick('services')}
-                className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
+              </InternalLink>
+              <InternalLink href="/services" route="services" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
               >
                 All Services
-              </button>
-              <button
-                onClick={() => handleLinkClick('about')}
-                className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
+              </InternalLink>
+              <InternalLink href="/about" route="about" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
               >
                 About Us
-              </button>
-              <button
-                onClick={() => handleLinkClick('service-areas')}
-                className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
+              </InternalLink>
+              <InternalLink href="/service-areas" route="service-areas" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
               >
                 Service Areas
-              </button>
-              <button
-                onClick={() => handleLinkClick('reviews')}
-                className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
+              </InternalLink>
+              <InternalLink href="/reviews" route="reviews" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
               >
                 Reviews (4.9 ★)
-              </button>
-              <button
-                onClick={() => handleLinkClick('faq')}
-                className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
+              </InternalLink>
+              <InternalLink href="/faq" route="faq" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
               >
                 FAQs
-              </button>
-              <button
-                onClick={() => handleLinkClick('contact')}
-                className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
+              </InternalLink>
+              <InternalLink href="/contact" route="contact" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-slate-50 text-slate-800 font-bold text-sm"
               >
                 Contact
-              </button>
-              <button
-                onClick={() => handleLinkClick('inquiry')}
-                className="text-left px-3 py-2 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-sm border border-emerald-200 flex items-center justify-between"
+              </InternalLink>
+              <InternalLink href="/inquiry" route="inquiry" onNavigate={handleLinkClick} className="text-left px-3 py-2 rounded-xl bg-emerald-50 text-emerald-800 font-bold text-sm border border-emerald-200 flex items-center justify-between"
               >
                 <div className="flex items-center gap-1.5">
                   <WhatsAppIcon className="w-3.5 h-3.5 fill-[#25D366]" />
                   <span>Customer Inquiry</span>
                 </div>
                 <span className="text-[10px] uppercase font-bold bg-emerald-200 text-emerald-900 px-1.5 py-0.5 rounded">New</span>
-              </button>
+              </InternalLink>
             </div>
 
             {/* Direct Service Quick Links */}
@@ -396,14 +357,14 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
               </div>
               <div className="space-y-1">
                 {SERVICES.map(srv => (
-                  <button
+                  <InternalLink href={SERVICE_ROUTES[srv.id].path} route={SERVICE_ROUTES[srv.id].route} onNavigate={handleLinkClick}
                     key={srv.id}
-                    onClick={() => handleLinkClick(`service-${srv.id.split('-')[0]}` as PageRoute)}
+                    
                     className="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50 text-xs font-semibold text-slate-700 flex items-center justify-between"
                   >
                     <span>{srv.shortTitle}</span>
                     <span className="text-[11px] text-teal-600">{srv.startingPrice}</span>
-                  </button>
+                  </InternalLink>
                 ))}
               </div>
             </div>
@@ -433,13 +394,11 @@ export default function Navbar({ currentRoute, onNavigate, onOpenQuoteModal }: N
                 <Sparkles className="w-4 h-4" />
                 <span>Get a Free Quote</span>
               </button>
-              <button
-                onClick={() => handleLinkClick('book-online')}
-                className="w-full py-3 rounded-xl border border-slate-300 text-slate-800 font-bold text-sm flex items-center justify-center gap-2"
+              <InternalLink href="/book-online" route="book-online" onNavigate={handleLinkClick} className="w-full py-3 rounded-xl border border-slate-300 text-slate-800 font-bold text-sm flex items-center justify-center gap-2"
               >
                 <Calendar className="w-4 h-4 text-teal-600" />
                 <span>Book Online (Instant Scheduler)</span>
-              </button>
+              </InternalLink>
             </div>
           </div>
         )}
