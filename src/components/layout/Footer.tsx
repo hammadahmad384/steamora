@@ -1,4 +1,6 @@
 import { PageRoute } from '../../types';
+import InternalLink from '../ui/InternalLink';
+import { SERVICE_ROUTES } from '../../utils/routes';
 import { COMPANY_INFO, trackConversion } from '../../data/config';
 import { SERVICES } from '../../data/servicesData';
 import { MELBOURNE_SUBURBS } from '../../data/suburbsData';
@@ -176,21 +178,19 @@ export default function Footer({ onNavigate, onOpenQuoteModal, onOpenOwnerLeads 
             <ul className="space-y-2.5 text-xs">
               {SERVICES.map(srv => (
                 <li key={srv.id}>
-                  <button
-                    onClick={() => onNavigate(`service-${srv.id.split('-')[0]}` as PageRoute)}
+                  <InternalLink href={SERVICE_ROUTES[srv.id].path} route={SERVICE_ROUTES[srv.id].route} onNavigate={onNavigate}
+                    
                     className="hover:text-teal-400 transition-colors text-left"
                   >
                     {srv.title}
-                  </button>
+                  </InternalLink>
                 </li>
               ))}
               <li className="pt-2">
-                <button
-                  onClick={() => onNavigate('services')}
-                  className="font-bold text-teal-400 hover:text-teal-300 text-xs"
+                <InternalLink href="/services" route="services" onNavigate={onNavigate} className="font-bold text-teal-400 hover:text-teal-300 text-xs"
                 >
                   View All Services & Pricing →
-                </button>
+                </InternalLink>
               </li>
             </ul>
           </div>
@@ -203,22 +203,18 @@ export default function Footer({ onNavigate, onOpenQuoteModal, onOpenOwnerLeads 
             <ul className="space-y-2 text-xs">
               {MELBOURNE_SUBURBS.slice(0, 7).map(sub => (
                 <li key={sub.slug}>
-                  <button
-                    onClick={() => onNavigate('suburb-detail', sub.slug)}
-                    className="hover:text-teal-400 transition-colors text-left flex items-center justify-between w-full"
+                  <InternalLink href={`/suburbs/${encodeURIComponent(sub.slug)}`} route="suburb-detail" param={sub.slug} onNavigate={onNavigate} className="hover:text-teal-400 transition-colors text-left flex items-center justify-between w-full"
                   >
                     <span>{sub.name}</span>
                     <span className="text-slate-600 text-[10px]">{sub.postcode}</span>
-                  </button>
+                  </InternalLink>
                 </li>
               ))}
               <li className="pt-2">
-                <button
-                  onClick={() => onNavigate('service-areas')}
-                  className="font-bold text-teal-400 hover:text-teal-300 text-xs"
+                <InternalLink href="/service-areas" route="service-areas" onNavigate={onNavigate} className="font-bold text-teal-400 hover:text-teal-300 text-xs"
                 >
                   All 45+ Melbourne Locations →
-                </button>
+                </InternalLink>
               </li>
             </ul>
           </div>
@@ -230,29 +226,29 @@ export default function Footer({ onNavigate, onOpenQuoteModal, onOpenOwnerLeads 
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <button onClick={() => onNavigate('home')} className="hover:text-white transition-colors">
+                <InternalLink href="/" route="home" onNavigate={onNavigate} className="hover:text-white transition-colors">
                   Home
-                </button>
+                </InternalLink>
               </li>
               <li>
-                <button onClick={() => onNavigate('about')} className="hover:text-white transition-colors">
+                <InternalLink href="/about" route="about" onNavigate={onNavigate} className="hover:text-white transition-colors">
                   About Our Company
-                </button>
+                </InternalLink>
               </li>
               <li>
-                <button onClick={() => onNavigate('reviews')} className="hover:text-white transition-colors">
+                <InternalLink href="/reviews" route="reviews" onNavigate={onNavigate} className="hover:text-white transition-colors">
                   Melbourne Reviews ({COMPANY_INFO.ratings.totalReviews}+)
-                </button>
+                </InternalLink>
               </li>
               <li>
-                <button onClick={() => onNavigate('faq')} className="hover:text-white transition-colors">
+                <InternalLink href="/faq" route="faq" onNavigate={onNavigate} className="hover:text-white transition-colors">
                   Frequently Asked Questions
-                </button>
+                </InternalLink>
               </li>
               <li>
-                <button onClick={() => onNavigate('book-online')} className="hover:text-white transition-colors font-semibold text-teal-300">
+                <InternalLink href="/book-online" route="book-online" onNavigate={onNavigate} className="hover:text-white transition-colors font-semibold text-teal-300">
                   Book Online (Instant)
-                </button>
+                </InternalLink>
               </li>
               <li>
                 <button onClick={() => onOpenQuoteModal()} className="hover:text-white transition-colors font-semibold text-teal-300">
@@ -260,20 +256,20 @@ export default function Footer({ onNavigate, onOpenQuoteModal, onOpenOwnerLeads 
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigate('contact')} className="hover:text-white transition-colors">
+                <InternalLink href="/contact" route="contact" onNavigate={onNavigate} className="hover:text-white transition-colors">
                   Contact Steamora Melbourne
-                </button>
+                </InternalLink>
               </li>
               <li>
-                <button onClick={() => onNavigate('inquiry')} className="hover:text-white transition-colors text-emerald-300 font-bold flex items-center gap-1">
+                <InternalLink href="/inquiry" route="inquiry" onNavigate={onNavigate} className="hover:text-white transition-colors text-emerald-300 font-bold flex items-center gap-1">
                   <span>Customer Inquiry (WhatsApp & Email)</span>
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                </button>
+                </InternalLink>
               </li>
               <li>
-                <button onClick={() => onNavigate('google-ads-landing')} className="text-slate-600 hover:text-slate-400 text-[11px]">
+                <InternalLink href="/special-offer" route="google-ads-landing" onNavigate={onNavigate} className="text-slate-600 hover:text-slate-400 text-[11px]">
                   Special Carpet Clean Offer
-                </button>
+                </InternalLink>
               </li>
             </ul>
 
@@ -296,15 +292,15 @@ export default function Footer({ onNavigate, onOpenQuoteModal, onOpenOwnerLeads 
             © 2026 Steamora Cleaning Services Pty Ltd. All Rights Reserved. Melbourne, Victoria, Australia.
           </div>
           <div className="flex flex-wrap items-center gap-4 sm:gap-6">
-            <button onClick={() => onNavigate('faq')} className="hover:text-slate-300 transition-colors">
+            <InternalLink href="/faq" route="faq" onNavigate={onNavigate} className="hover:text-slate-300 transition-colors">
               Privacy Policy
-            </button>
-            <button onClick={() => onNavigate('faq')} className="hover:text-slate-300 transition-colors">
+            </InternalLink>
+            <InternalLink href="/faq" route="faq" onNavigate={onNavigate} className="hover:text-slate-300 transition-colors">
               Terms & Conditions
-            </button>
-            <button onClick={() => onNavigate('contact')} className="hover:text-slate-300 transition-colors">
+            </InternalLink>
+            <InternalLink href="/contact" route="contact" onNavigate={onNavigate} className="hover:text-slate-300 transition-colors">
               Melbourne Dispatch
-            </button>
+            </InternalLink>
             {onOpenOwnerLeads && (
               <button 
                 onClick={onOpenOwnerLeads} 
