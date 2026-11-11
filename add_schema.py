@@ -23,8 +23,8 @@ const generateBaseSchema = () => {
     "@context": "https://schema.org",
     "@type": "CleaningService",
     "name": "STEAMORA Cleaning",
-    "image": "https://steamoracleaning.com.au/images/carpet-cleaning.webp",
-    "url": "https://steamoracleaning.com.au",
+    "image": "https://steamoracleaning.com/images/carpet-cleaning.webp",
+    "url": "https://steamoracleaning.com",
     "telephone": "0426 000 000",
     "address": {
       "@type": "PostalAddress",
@@ -63,7 +63,7 @@ inject_schema = """  // 5. Update Twitter Card Meta Tags
   // 6. Update Structured Data
   if (resolvedSeo.canonicalPath && resolvedSeo.canonicalPath !== '/' && !resolvedSeo.canonicalPath.includes('suburbs') && !resolvedSeo.canonicalPath.includes('service-areas')) {
      const serviceName = resolvedSeo.title.split('|')[0].trim();
-     setStructuredData(generateServiceSchema(serviceName, `https://steamoracleaning.com.au${resolvedSeo.canonicalPath}`, resolvedSeo.description));
+     setStructuredData(generateServiceSchema(serviceName, `https://steamoracleaning.com${resolvedSeo.canonicalPath}`, resolvedSeo.description));
   } else {
      setStructuredData(generateBaseSchema());
   }

@@ -13,16 +13,16 @@ content = content.replace("title: 'Mattress Cleaning Melbourne | STEAMORA Cleani
 content = content.replace("title: 'Upholstery Cleaning Melbourne | STEAMORA Cleaning',", "title: 'Upholstery Cleaning Melbourne | STEAMORA Cleaning',")
 content = content.replace("title: 'Blind Cleaning Melbourne | STEAMORA Cleaning',", "title: 'Blind Cleaning Melbourne | STEAMORA Cleaning',")
 
-content = content.replace("https://steamora.com.au", "https://steamoracleaning.com.au")
+content = content.replace("https://steamoracleaning.com", "https://steamoracleaning.com")
 content = content.replace("BRAND_SUFFIX = ' | STEAMORA Melbourne'", "BRAND_SUFFIX = ' | STEAMORA Cleaning'")
-content = content.replace("@id\": \"https://steamora.com.au\"", "@id\": \"https://steamoracleaning.com.au\"")
-content = content.replace("url\": \"https://steamora.com.au\"", "url\": \"https://steamoracleaning.com.au\"")
+content = content.replace("@id\": \"https://steamoracleaning.com\"", "@id\": \"https://steamoracleaning.com\"")
+content = content.replace("url\": \"https://steamoracleaning.com\"", "url\": \"https://steamoracleaning.com\"")
 
 # Ensure og:site_name is correct
 content = content.replace("'STEAMORA'", "'STEAMORA Cleaning'")
 
 # Update og:image in generated schema
-content = content.replace("https://steamoracleaning.com.au/images/carpet-cleaning.webp", "https://steamoracleaning.com.au/android-chrome-512x512.png")
+content = content.replace("https://steamoracleaning.com/images/carpet-cleaning.webp", "https://steamoracleaning.com/android-chrome-512x512.png")
 
 with open('src/utils/seo.ts', 'w') as f:
     f.write(content)

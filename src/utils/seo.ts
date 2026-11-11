@@ -21,7 +21,7 @@ export interface PageSeoConfig {
   };
 }
 
-const BASE_URL = 'https://steamoracleaning.com.au';
+const BASE_URL = 'https://steamoracleaning.com';
 const BRAND_SUFFIX = ' | STEAMORA Cleaning';
 
 /**
@@ -159,12 +159,12 @@ export function getPageSeo(route: PageRoute, param?: string): PageSeoConfig {
         canonicalPath: '/rug-cleaning',
         ogTitle: 'Rug Cleaning Melbourne | Persian, Wool & Area Rugs | STEAMORA',
         ogDescription: 'Specialist rug cleaning in Melbourne from $80. Gentle fiber care for Persian, oriental, wool, and modern area rugs. Color-safe stain removal. Instant quote!',
-        ogImage: 'https://steamoracleaning.com.au/images/rug-cleaning.webp',
+        ogImage: '/images/rug-cleaning.webp',
         serviceData: {
           name: 'Rug Cleaning & Preservation',
           price: 80,
           priceFormatted: '$80 - $100',
-          image: 'https://steamoracleaning.com.au/images/rug-cleaning.webp'
+          image: '/images/rug-cleaning.webp'
         }
       };
     case 'service-areas':

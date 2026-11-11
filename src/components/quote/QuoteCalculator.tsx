@@ -171,7 +171,7 @@ export default function QuoteCalculator({
     const body = [
       `Hi Steamora Dispatch,`,
       ``,
-      `A new customer quote has been submitted on steamora.com.au:`,
+      `A new customer quote has been submitted on steamoracleaning.com:`,
       ``,
       `• Customer Name: ${formData.fullName}`,
       `• Phone: ${formData.phone}`,
