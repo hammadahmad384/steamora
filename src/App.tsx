@@ -45,6 +45,10 @@ const mapPathToRoute = (path: string): { route: PageRoute; param: string } => {
   if (path === '/faq') return { route: 'faq', param: '' };
   if (path === '/book-online') return { route: 'book-online', param: '' };
   if (path === '/contact') return { route: 'contact', param: '' };
+  if (path === '/service-areas') return { route: 'service-areas', param: '' };
+  if (path === '/inquiry') return { route: 'inquiry', param: '' };
+  if (path === '/special-offer') return { route: 'google-ads-landing', param: '' };
+  if (path === '/quote') return { route: 'contact', param: '' };
   if (path === '/sofa-cleaning' || path === '/services/sofa-cleaning') return { route: 'service-sofa', param: 'sofa-cleaning' };
   if (path === '/carpet-cleaning' || path === '/services/carpet-cleaning') return { route: 'service-carpet', param: 'carpet-cleaning' };
   if (path === '/upholstery-cleaning' || path === '/services/upholstery-cleaning') return { route: 'service-upholstery', param: 'upholstery-cleaning' };
@@ -57,6 +61,9 @@ const mapPathToRoute = (path: string): { route: PageRoute; param: string } => {
 
 const mapRouteToPath = (route: PageRoute, param?: string): string => {
   if (route === 'home') return '/';
+  if (route === 'google-ads-landing') return '/special-offer';
+  if (route === 'quote') return '/contact';
+  if (route === 'suburb-detail' && !param) return '/service-areas';
   if (route === 'service-sofa') return '/sofa-cleaning';
   if (route === 'service-carpet') return '/carpet-cleaning';
   if (route === 'service-upholstery') return '/upholstery-cleaning';
