@@ -47,6 +47,7 @@ export type AnalyticsEventType =
   | 'quote_form_submit'
   | 'inquiry_submit'
   | 'booking_submit'
+  | 'email_click'
   | 'whatsapp_click'
   | 'view_service'
   | 'calculator_used'
@@ -80,7 +81,16 @@ export function trackConversion(type: AnalyticsEventType, label: string, value?:
       value: value || 0,
       timestamp: new Date().toISOString()
     });
-    console.log('[STEAMORA GA4/GTM TRACKED]', event);
+    // GA4 is loaded via gtag.js in index.html; dataLayer custom events alone
+    // do not automatically become GA4 events without GTM trigger configuration.
+    const gtag = (window as any).gtag;
+    if (typeof gtag === 'function') {
+      gtag('event', type, {
+        event_label: label,
+        value: value ?? 0
+      });
+    }
+    console.log('[STEAMORA ANALYTICS EVENT]', event);
   }
 
   // Notify active listeners (e.g. for user toast feedback)
