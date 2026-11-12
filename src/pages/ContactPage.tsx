@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { PageRoute } from '../types';
 import { COMPANY_INFO, trackConversion } from '../data/config';
 import { MELBOURNE_SUBURBS } from '../data/suburbsData';
@@ -35,6 +35,7 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
   const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const submittingRef = useRef(false);
   const [sendError, setSendError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -52,7 +53,8 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSending || !validate()) return;
+    if (submittingRef.current || !validate()) return;
+    submittingRef.current = true;
     setIsSending(true);
     setSendError('');
 
@@ -74,6 +76,7 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
     });
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      submittingRef.current = false;
       setIsSending(false);
 
       return;
@@ -87,10 +90,11 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
       service: formData.service,
       details: formData.message || 'General contact enquiry'
     });
+    submittingRef.current = false;
     setIsSending(false);
     trackConversion(
       'quote_form_submit',
-      `Contact Enquiry: ${formData.name} (${resolvedSuburb}) - ${formData.service}`
+      `Contact Enquiry - ${formData.service}`
     );
 
 
