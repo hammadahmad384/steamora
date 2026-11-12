@@ -69,10 +69,10 @@ export async function dispatchQuoteToOwnerEmail(data: EmailQuotePayload): Promis
 
     // FormSubmit can respond with HTTP 200 while reporting an application-level failure.
     const result = await response.json().catch(() => null);
-    if (response.ok && result?.success === 'true') {
+    if (response.ok && (result?.success === 'true' || result?.success === true)) {
       return { success: true, message: `Accepted by FormSubmit for ${TARGET_EMAIL}` };
     } else {
-      console.warn('FormSubmit returned non-ok status, falling back gracefully:', response.status);
+      console.warn('FormSubmit did not confirm acceptance:', response.status);
       return { success: false, message: 'Email service did not confirm acceptance' };
     }
   } catch (error) {
