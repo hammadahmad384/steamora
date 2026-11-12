@@ -67,11 +67,13 @@ export async function dispatchQuoteToOwnerEmail(data: EmailQuotePayload): Promis
       body: JSON.stringify(payload)
     });
 
-    if (response.ok) {
-      return { success: true, message: `Dispatched to ${TARGET_EMAIL}` };
+    // FormSubmit can respond with HTTP 200 while reporting an application-level failure.
+    const result = await response.json().catch(() => null);
+    if (response.ok && result?.success === 'true') {
+      return { success: true, message: `Accepted by FormSubmit for ${TARGET_EMAIL}` };
     } else {
       console.warn('FormSubmit returned non-ok status, falling back gracefully:', response.status);
-      return { success: false, message: 'Non-ok response from email service' };
+      return { success: false, message: 'Email service did not confirm acceptance' };
     }
   } catch (error) {
     console.error('Email dispatch error (handled):', error);
