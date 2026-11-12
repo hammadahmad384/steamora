@@ -60,15 +60,7 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
       ? customSuburb.trim()
       : formData.suburb;
 
-    saveLead({
-      type: 'contact',
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      suburb: resolvedSuburb,
-      service: formData.service,
-      details: formData.message || 'General contact enquiry'
-    });
+
 
     // Automatically send notification email directly to steamoracleaning@gmail.com
     const result = await dispatchQuoteToOwnerEmail({
@@ -83,6 +75,15 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
       setIsSending(false);
+    saveLead({
+      type: 'contact',
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      details: formData.message || 'General contact enquiry'
+    });
       return;
     }
     setIsSending(false);
