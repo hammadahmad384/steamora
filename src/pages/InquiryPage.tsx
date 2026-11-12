@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { COMPANY_INFO, trackConversion } from '../data/config';
 import { MELBOURNE_SUBURBS } from '../data/suburbsData';
 import { SERVICES } from '../data/servicesData';
@@ -43,6 +43,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const submittingRef = useRef(false);
   const [sendError, setSendError] = useState('');
   const [submittedData, setSubmittedData] = useState<typeof formData | null>(null);
   const [copied, setCopied] = useState(false);
@@ -126,7 +127,8 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSending || !validate()) return;
+    if (submittingRef.current || !validate()) return;
+    submittingRef.current = true;
     setIsSending(true);
     setSendError('');
 
@@ -153,6 +155,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     });
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      submittingRef.current = false;
       setIsSending(false);
 
       return;
@@ -166,10 +169,11 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
       service: dataToSubmit.service,
       details: `Preferred Time: ${dataToSubmit.time}${dataToSubmit.message ? ` | Notes: ${dataToSubmit.message}` : ''}`
     });
+    submittingRef.current = false;
     setIsSending(false);
     trackConversion(
       'inquiry_submit',
-      `Customer Inquiry: ${dataToSubmit.name} (${dataToSubmit.area}) - ${dataToSubmit.service}`
+      `Customer Inquiry - ${dataToSubmit.service}`
     );
 
 
@@ -382,7 +386,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
 
                   <a
                     href={getMailtoLink(submittedData)}
-                    onClick={() => trackConversion('quote_form_submit', 'Inquiry Confirmation Email Send')}
+                    onClick={() => trackConversion('email_click', 'Inquiry Confirmation Email Click')}
                     className="py-4 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 transition-all text-center"
                   >
                     <Mail className="w-5 h-5 text-teal-400 shrink-0" />
