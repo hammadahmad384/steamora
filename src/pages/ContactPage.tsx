@@ -75,6 +75,9 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
       setIsSending(false);
+
+      return;
+    }
     saveLead({
       type: 'contact',
       name: formData.name,
@@ -84,8 +87,6 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
       service: formData.service,
       details: formData.message || 'General contact enquiry'
     });
-      return;
-    }
     setIsSending(false);
     trackConversion(
       'quote_form_submit',
