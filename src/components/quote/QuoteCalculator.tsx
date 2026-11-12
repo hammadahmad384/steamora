@@ -34,6 +34,8 @@ export default function QuoteCalculator({
   const [isCustomSuburb, setIsCustomSuburb] = useState(false);
   const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [isEmailDispatched, setIsEmailDispatched] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -92,21 +94,16 @@ export default function QuoteCalculator({
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (isSending || !validate()) return;
+    setIsSending(true);
+    setSendError('');
 
     const resolvedSuburb = (isCustomSuburb || formData.suburb === 'Other') && customSuburb.trim()
       ? customSuburb.trim()
       : formData.suburb;
 
-    trackConversion(
-      'quote_form_submit',
-      `Free Quote: ${formData.fullName} - ${formData.service} (${resolvedSuburb})`,
-      estimatedPriceMin
-    );
-
-    // Save lead record for owner access & persistence
     saveLead({
       type: 'quote',
       name: formData.fullName,
@@ -119,7 +116,7 @@ export default function QuoteCalculator({
     });
 
     // Automatically send notification email directly to steamoracleaning@gmail.com
-    dispatchQuoteToOwnerEmail({
+    const result = await dispatchQuoteToOwnerEmail({
       name: formData.fullName,
       phone: formData.phone,
       email: formData.email,
@@ -132,11 +129,22 @@ export default function QuoteCalculator({
       hasPetOdour: formData.hasPetOdour,
       details: formData.message,
       source: 'Steamora Free Quote Calculator'
-    }).then((res) => {
-      if (res.success) {
-        setIsEmailDispatched(true);
-      }
     });
+    if (!result.success) {
+      setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      setIsSending(false);
+      return;
+    }
+    setIsSending(false);
+    setIsEmailDispatched(true);
+    trackConversion(
+      'quote_form_submit',
+      `Free Quote: ${formData.fullName} - ${formData.service} (${resolvedSuburb})`,
+      estimatedPriceMin
+    );
+
+    // Save lead record for owner access & persistence
+
 
     setFormData(prev => ({ ...prev, suburb: resolvedSuburb }));
     setIsSubmitted(true);
@@ -312,6 +320,7 @@ export default function QuoteCalculator({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {sendError && <p role="alert" className="text-sm text-red-700">{sendError}</p>}
         {/* Row 1: Service and Property Type */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -522,7 +531,7 @@ export default function QuoteCalculator({
 
         {/* Submit Action */}
         <div className="pt-2">
-          <button
+          <button disabled={isSending}
             type="submit"
             className="w-full py-4 px-6 rounded-2xl bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-extrabold text-base tracking-wide uppercase transition-all duration-300 shadow-xl shadow-teal-600/25 flex items-center justify-center gap-2 group cursor-pointer"
           >
