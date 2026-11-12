@@ -104,16 +104,7 @@ export default function QuoteCalculator({
       ? customSuburb.trim()
       : formData.suburb;
 
-    saveLead({
-      type: 'quote',
-      name: formData.fullName,
-      phone: formData.phone,
-      email: formData.email,
-      suburb: resolvedSuburb,
-      service: formData.service,
-      estimatedPrice: `${estimatedPriceMin} - ${estimatedPriceMax}`,
-      details: `Rooms: ${formData.roomsCount}, Property: ${formData.propertyType}, Stains: ${formData.hasStains ? 'Yes' : 'No'}, Pet Odour: ${formData.hasPetOdour ? 'Yes' : 'No'}${formData.message ? ` | Notes: ${formData.message}` : ''}`
-    });
+
 
     // Automatically send notification email directly to steamoracleaning@gmail.com
     const result = await dispatchQuoteToOwnerEmail({
@@ -133,6 +124,16 @@ export default function QuoteCalculator({
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
       setIsSending(false);
+    saveLead({
+      type: 'quote',
+      name: formData.fullName,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      estimatedPrice: `${estimatedPriceMin} - ${estimatedPriceMax}`,
+      details: `Rooms: ${formData.roomsCount}, Property: ${formData.propertyType}, Stains: ${formData.hasStains ? 'Yes' : 'No'}, Pet Odour: ${formData.hasPetOdour ? 'Yes' : 'No'}${formData.message ? ` | Notes: ${formData.message}` : ''}`
+    });
       return;
     }
     setIsSending(false);
