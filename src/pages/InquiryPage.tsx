@@ -138,15 +138,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     setSubmittedData(dataToSubmit);
 
     // Track analytics conversion
-    saveLead({
-      type: 'inquiry',
-      name: dataToSubmit.name,
-      phone: dataToSubmit.phone,
-      email: dataToSubmit.email,
-      suburb: dataToSubmit.area,
-      service: dataToSubmit.service,
-      details: `Preferred Time: ${dataToSubmit.time}${dataToSubmit.message ? ` | Notes: ${dataToSubmit.message}` : ''}`
-    });
+
 
     // Automatically send notification email directly to steamoracleaning@gmail.com
     const result = await dispatchQuoteToOwnerEmail({
@@ -162,6 +154,15 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
       setIsSending(false);
+    saveLead({
+      type: 'inquiry',
+      name: dataToSubmit.name,
+      phone: dataToSubmit.phone,
+      email: dataToSubmit.email,
+      suburb: dataToSubmit.area,
+      service: dataToSubmit.service,
+      details: `Preferred Time: ${dataToSubmit.time}${dataToSubmit.message ? ` | Notes: ${dataToSubmit.message}` : ''}`
+    });
       return;
     }
     setIsSending(false);
@@ -174,9 +175,6 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
 
     setIsSubmitted(true);
 
-    // Automatically trigger WhatsApp direct send in a new tab
-    const waUrl = getWhatsAppLink(dataToSubmit);
-    // Customer can choose WhatsApp from the confirmation page; do not force a popup.
   };
 
   const handleCopySummary = () => {
