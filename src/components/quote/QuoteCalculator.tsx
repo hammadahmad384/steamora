@@ -124,6 +124,9 @@ export default function QuoteCalculator({
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
       setIsSending(false);
+
+      return;
+    }
     saveLead({
       type: 'quote',
       name: formData.fullName,
@@ -134,8 +137,6 @@ export default function QuoteCalculator({
       estimatedPrice: `${estimatedPriceMin} - ${estimatedPriceMax}`,
       details: `Rooms: ${formData.roomsCount}, Property: ${formData.propertyType}, Stains: ${formData.hasStains ? 'Yes' : 'No'}, Pet Odour: ${formData.hasPetOdour ? 'Yes' : 'No'}${formData.message ? ` | Notes: ${formData.message}` : ''}`
     });
-      return;
-    }
     setIsSending(false);
     setIsEmailDispatched(true);
     trackConversion(
