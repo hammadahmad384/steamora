@@ -74,21 +74,19 @@ export function trackConversion(type: AnalyticsEventType, label: string, value?:
 
   // Push to dataLayer if available (GTM / GA4 standard)
   if (typeof window !== 'undefined') {
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).dataLayer.push({
-      event: type,
+    // gtag.js uses dataLayer internally. Do not also push a separate object
+    // with the same event name: that can trigger duplicate GTM conversions.
+    const eventParams = {
       event_label: label,
-      value: value || 0,
-      timestamp: new Date().toISOString()
-    });
-    // GA4 is loaded via gtag.js in index.html; dataLayer custom events alone
-    // do not automatically become GA4 events without GTM trigger configuration.
+      value: value ?? 0
+    };
     const gtag = (window as any).gtag;
     if (typeof gtag === 'function') {
-      gtag('event', type, {
-        event_label: label,
-        value: value ?? 0
-      });
+      gtag('event', type, eventParams);
+    } else {
+      // gtag.js may still be loading. Queue the canonical gtag command.
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push(['event', type, eventParams]);
     }
     console.log('[STEAMORA ANALYTICS EVENT]', event);
   }
