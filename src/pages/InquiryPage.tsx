@@ -154,6 +154,9 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
       setIsSending(false);
+
+      return;
+    }
     saveLead({
       type: 'inquiry',
       name: dataToSubmit.name,
@@ -163,8 +166,6 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
       service: dataToSubmit.service,
       details: `Preferred Time: ${dataToSubmit.time}${dataToSubmit.message ? ` | Notes: ${dataToSubmit.message}` : ''}`
     });
-      return;
-    }
     setIsSending(false);
     trackConversion(
       'inquiry_submit',
