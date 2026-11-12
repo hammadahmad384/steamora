@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { COMPANY_INFO, trackConversion } from '../data/config';
 import { MELBOURNE_SUBURBS } from '../data/suburbsData';
 import { SERVICES } from '../data/servicesData';
@@ -42,6 +42,9 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
   const [customArea, setCustomArea] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const submittingRef = useRef(false);
+  const [sendError, setSendError] = useState('');
   const [submittedData, setSubmittedData] = useState<typeof formData | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -122,9 +125,12 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     return `mailto:${COMPANY_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (submittingRef.current || !validate()) return;
+    submittingRef.current = true;
+    setIsSending(true);
+    setSendError('');
 
     const resolvedArea = (isCustomArea || formData.area === 'Other') && customArea.trim()
       ? customArea.trim()
@@ -134,23 +140,10 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     setSubmittedData(dataToSubmit);
 
     // Track analytics conversion
-    trackConversion(
-      'inquiry_submit',
-      `Customer Inquiry: ${dataToSubmit.name} (${dataToSubmit.area}) - ${dataToSubmit.service}`
-    );
 
-    saveLead({
-      type: 'inquiry',
-      name: dataToSubmit.name,
-      phone: dataToSubmit.phone,
-      email: dataToSubmit.email,
-      suburb: dataToSubmit.area,
-      service: dataToSubmit.service,
-      details: `Preferred Time: ${dataToSubmit.time}${dataToSubmit.message ? ` | Notes: ${dataToSubmit.message}` : ''}`
-    });
 
     // Automatically send notification email directly to steamoracleaning@gmail.com
-    dispatchQuoteToOwnerEmail({
+    const result = await dispatchQuoteToOwnerEmail({
       name: dataToSubmit.name,
       phone: dataToSubmit.phone,
       email: dataToSubmit.email,
@@ -160,12 +153,33 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
       preferredTime: dataToSubmit.time,
       source: 'Steamora Customer Inquiry Form'
     });
+    if (!result.success) {
+      setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      submittingRef.current = false;
+      setIsSending(false);
+
+      return;
+    }
+    saveLead({
+      type: 'inquiry',
+      name: dataToSubmit.name,
+      phone: dataToSubmit.phone,
+      email: dataToSubmit.email,
+      suburb: dataToSubmit.area,
+      service: dataToSubmit.service,
+      details: `Preferred Time: ${dataToSubmit.time}${dataToSubmit.message ? ` | Notes: ${dataToSubmit.message}` : ''}`
+    });
+    submittingRef.current = false;
+    setIsSending(false);
+    trackConversion(
+      'inquiry_submit',
+      `Customer Inquiry - ${dataToSubmit.service}`
+    );
+
+
 
     setIsSubmitted(true);
 
-    // Automatically trigger WhatsApp direct send in a new tab
-    const waUrl = getWhatsAppLink(dataToSubmit);
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   const handleCopySummary = () => {
@@ -372,7 +386,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
 
                   <a
                     href={getMailtoLink(submittedData)}
-                    onClick={() => trackConversion('quote_form_submit', 'Inquiry Confirmation Email Send')}
+                    onClick={() => trackConversion('email_click', 'Inquiry Confirmation Email Click')}
                     className="py-4 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-sm flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 transition-all text-center"
                   >
                     <Mail className="w-5 h-5 text-teal-400 shrink-0" />
@@ -396,6 +410,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
+        {sendError && <p role="alert" className="text-sm text-red-700">{sendError}</p>}
                 <div>
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">
@@ -603,7 +618,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
 
                 {/* Submit Action */}
                 <div className="pt-2">
-                  <button
+                  <button disabled={isSending}
                     type="submit"
                     className="w-full py-4 px-6 rounded-2xl bg-[#25D366] hover:bg-[#1EBE5D] active:bg-[#128C7E] text-white font-extrabold text-sm sm:text-base uppercase tracking-wider shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
                   >

@@ -47,6 +47,7 @@ export type AnalyticsEventType =
   | 'quote_form_submit'
   | 'inquiry_submit'
   | 'booking_submit'
+  | 'email_click'
   | 'whatsapp_click'
   | 'view_service'
   | 'calculator_used'
@@ -73,14 +74,21 @@ export function trackConversion(type: AnalyticsEventType, label: string, value?:
 
   // Push to dataLayer if available (GTM / GA4 standard)
   if (typeof window !== 'undefined') {
-    (window as any).dataLayer = (window as any).dataLayer || [];
-    (window as any).dataLayer.push({
-      event: type,
+    // gtag.js uses dataLayer internally. Do not also push a separate object
+    // with the same event name: that can trigger duplicate GTM conversions.
+    const eventParams = {
       event_label: label,
-      value: value || 0,
-      timestamp: new Date().toISOString()
-    });
-    console.log('[STEAMORA GA4/GTM TRACKED]', event);
+      value: value ?? 0
+    };
+    const gtag = (window as any).gtag;
+    if (typeof gtag === 'function') {
+      gtag('event', type, eventParams);
+    } else {
+      // gtag.js may still be loading. Queue the canonical gtag command.
+      (window as any).dataLayer = (window as any).dataLayer || [];
+      (window as any).dataLayer.push(['event', type, eventParams]);
+    }
+    console.log('[STEAMORA ANALYTICS EVENT]', event);
   }
 
   // Notify active listeners (e.g. for user toast feedback)

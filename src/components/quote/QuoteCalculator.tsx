@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { trackConversion, COMPANY_INFO } from '../../data/config';
 import { MELBOURNE_SUBURBS } from '../../data/suburbsData';
 import { CheckCircle2, Calculator, ArrowRight, ShieldCheck, Sparkles, Mail, Phone } from 'lucide-react';
@@ -34,6 +34,9 @@ export default function QuoteCalculator({
   const [isCustomSuburb, setIsCustomSuburb] = useState(false);
   const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const submittingRef = useRef(false);
+  const [sendError, setSendError] = useState('');
   const [isEmailDispatched, setIsEmailDispatched] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -92,34 +95,21 @@ export default function QuoteCalculator({
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (submittingRef.current || !validate()) return;
+    submittingRef.current = true;
+    setIsSending(true);
+    setSendError('');
 
     const resolvedSuburb = (isCustomSuburb || formData.suburb === 'Other') && customSuburb.trim()
       ? customSuburb.trim()
       : formData.suburb;
 
-    trackConversion(
-      'quote_form_submit',
-      `Free Quote: ${formData.fullName} - ${formData.service} (${resolvedSuburb})`,
-      estimatedPriceMin
-    );
 
-    // Save lead record for owner access & persistence
-    saveLead({
-      type: 'quote',
-      name: formData.fullName,
-      phone: formData.phone,
-      email: formData.email,
-      suburb: resolvedSuburb,
-      service: formData.service,
-      estimatedPrice: `${estimatedPriceMin} - ${estimatedPriceMax}`,
-      details: `Rooms: ${formData.roomsCount}, Property: ${formData.propertyType}, Stains: ${formData.hasStains ? 'Yes' : 'No'}, Pet Odour: ${formData.hasPetOdour ? 'Yes' : 'No'}${formData.message ? ` | Notes: ${formData.message}` : ''}`
-    });
 
     // Automatically send notification email directly to steamoracleaning@gmail.com
-    dispatchQuoteToOwnerEmail({
+    const result = await dispatchQuoteToOwnerEmail({
       name: formData.fullName,
       phone: formData.phone,
       email: formData.email,
@@ -132,11 +122,35 @@ export default function QuoteCalculator({
       hasPetOdour: formData.hasPetOdour,
       details: formData.message,
       source: 'Steamora Free Quote Calculator'
-    }).then((res) => {
-      if (res.success) {
-        setIsEmailDispatched(true);
-      }
     });
+    if (!result.success) {
+      setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      submittingRef.current = false;
+      setIsSending(false);
+
+      return;
+    }
+    saveLead({
+      type: 'quote',
+      name: formData.fullName,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      estimatedPrice: `${estimatedPriceMin} - ${estimatedPriceMax}`,
+      details: `Rooms: ${formData.roomsCount}, Property: ${formData.propertyType}, Stains: ${formData.hasStains ? 'Yes' : 'No'}, Pet Odour: ${formData.hasPetOdour ? 'Yes' : 'No'}${formData.message ? ` | Notes: ${formData.message}` : ''}`
+    });
+    submittingRef.current = false;
+    setIsSending(false);
+    setIsEmailDispatched(true);
+    trackConversion(
+      'quote_form_submit',
+      `Free Quote - ${formData.service}`,
+      estimatedPriceMin
+    );
+
+    // Save lead record for owner access & persistence
+
 
     setFormData(prev => ({ ...prev, suburb: resolvedSuburb }));
     setIsSubmitted(true);
@@ -247,7 +261,7 @@ export default function QuoteCalculator({
             </a>
             <a
               href={getQuoteMailtoUrl()}
-              onClick={() => trackConversion('quote_form_submit', 'Quote Confirmation Email Click')}
+              onClick={() => trackConversion('email_click', 'Quote Confirmation Email Click')}
               className="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 transition-all hover:scale-[1.02]"
             >
               <Mail className="w-4 h-4 text-teal-400" />
@@ -312,6 +326,7 @@ export default function QuoteCalculator({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {sendError && <p role="alert" className="text-sm text-red-700">{sendError}</p>}
         {/* Row 1: Service and Property Type */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -522,7 +537,7 @@ export default function QuoteCalculator({
 
         {/* Submit Action */}
         <div className="pt-2">
-          <button
+          <button disabled={isSending}
             type="submit"
             className="w-full py-4 px-6 rounded-2xl bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-extrabold text-base tracking-wide uppercase transition-all duration-300 shadow-xl shadow-teal-600/25 flex items-center justify-center gap-2 group cursor-pointer"
           >

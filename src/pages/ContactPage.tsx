@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { PageRoute } from '../types';
 import { COMPANY_INFO, trackConversion } from '../data/config';
 import { MELBOURNE_SUBURBS } from '../data/suburbsData';
@@ -34,6 +34,9 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
   const [isCustomSuburb, setIsCustomSuburb] = useState(false);
   const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const submittingRef = useRef(false);
+  const [sendError, setSendError] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validate = () => {
@@ -48,19 +51,36 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (submittingRef.current || !validate()) return;
+    submittingRef.current = true;
+    setIsSending(true);
+    setSendError('');
 
     const resolvedSuburb = (isCustomSuburb || formData.suburb === 'Other') && customSuburb.trim()
       ? customSuburb.trim()
       : formData.suburb;
 
-    trackConversion(
-      'quote_form_submit',
-      `Contact Enquiry: ${formData.name} (${resolvedSuburb}) - ${formData.service}`
-    );
 
+
+    // Automatically send notification email directly to steamoracleaning@gmail.com
+    const result = await dispatchQuoteToOwnerEmail({
+      name: formData.name,
+      phone: formData.phone,
+      email: formData.email,
+      suburb: resolvedSuburb,
+      service: formData.service,
+      details: formData.message,
+      source: 'Steamora Melbourne Contact Form'
+    });
+    if (!result.success) {
+      setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      submittingRef.current = false;
+      setIsSending(false);
+
+      return;
+    }
     saveLead({
       type: 'contact',
       name: formData.name,
@@ -70,17 +90,14 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
       service: formData.service,
       details: formData.message || 'General contact enquiry'
     });
+    submittingRef.current = false;
+    setIsSending(false);
+    trackConversion(
+      'quote_form_submit',
+      `Contact Enquiry - ${formData.service}`
+    );
 
-    // Automatically send notification email directly to steamoracleaning@gmail.com
-    dispatchQuoteToOwnerEmail({
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      suburb: resolvedSuburb,
-      service: formData.service,
-      details: formData.message,
-      source: 'Steamora Melbourne Contact Form'
-    });
+
 
     setIsSubmitted(true);
   };
@@ -264,6 +281,7 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
+        {sendError && <p role="alert" className="text-sm text-red-700">{sendError}</p>}
                 <div>
                   <h3 className="text-xl font-bold text-slate-900">
                     Send Us an Online Message
@@ -418,7 +436,7 @@ export default function ContactPage({ onNavigate, onOpenQuoteModal }: ContactPag
                   />
                 </div>
 
-                <button
+                <button disabled={isSending}
                   type="submit"
                   className="w-full py-4 rounded-xl bg-teal-600 hover:bg-teal-500 active:bg-teal-700 text-white font-extrabold text-sm uppercase tracking-wider shadow-lg shadow-teal-600/25 flex items-center justify-center gap-2"
                 >
