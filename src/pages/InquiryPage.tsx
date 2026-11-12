@@ -42,6 +42,8 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
   const [customArea, setCustomArea] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState('');
   const [submittedData, setSubmittedData] = useState<typeof formData | null>(null);
   const [copied, setCopied] = useState(false);
 
@@ -122,9 +124,11 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     return `mailto:${COMPANY_INFO.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    if (isSending || !validate()) return;
+    setIsSending(true);
+    setSendError('');
 
     const resolvedArea = (isCustomArea || formData.area === 'Other') && customArea.trim()
       ? customArea.trim()
@@ -134,11 +138,6 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     setSubmittedData(dataToSubmit);
 
     // Track analytics conversion
-    trackConversion(
-      'inquiry_submit',
-      `Customer Inquiry: ${dataToSubmit.name} (${dataToSubmit.area}) - ${dataToSubmit.service}`
-    );
-
     saveLead({
       type: 'inquiry',
       name: dataToSubmit.name,
@@ -150,7 +149,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
     });
 
     // Automatically send notification email directly to steamoracleaning@gmail.com
-    dispatchQuoteToOwnerEmail({
+    const result = await dispatchQuoteToOwnerEmail({
       name: dataToSubmit.name,
       phone: dataToSubmit.phone,
       email: dataToSubmit.email,
@@ -160,12 +159,24 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
       preferredTime: dataToSubmit.time,
       source: 'Steamora Customer Inquiry Form'
     });
+    if (!result.success) {
+      setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      setIsSending(false);
+      return;
+    }
+    setIsSending(false);
+    trackConversion(
+      'inquiry_submit',
+      `Customer Inquiry: ${dataToSubmit.name} (${dataToSubmit.area}) - ${dataToSubmit.service}`
+    );
+
+
 
     setIsSubmitted(true);
 
     // Automatically trigger WhatsApp direct send in a new tab
     const waUrl = getWhatsAppLink(dataToSubmit);
-    window.open(waUrl, '_blank', 'noopener,noreferrer');
+    // Customer can choose WhatsApp from the confirmation page; do not force a popup.
   };
 
   const handleCopySummary = () => {
@@ -396,6 +407,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
+        {sendError && <p role="alert" className="text-sm text-red-700">{sendError}</p>}
                 <div>
                   <div className="flex items-center justify-between">
                     <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900">
@@ -603,7 +615,7 @@ export default function InquiryPage({ onNavigate, onOpenQuoteModal }: InquiryPag
 
                 {/* Submit Action */}
                 <div className="pt-2">
-                  <button
+                  <button disabled={isSending}
                     type="submit"
                     className="w-full py-4 px-6 rounded-2xl bg-[#25D366] hover:bg-[#1EBE5D] active:bg-[#128C7E] text-white font-extrabold text-sm sm:text-base uppercase tracking-wider shadow-xl shadow-emerald-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
                   >
