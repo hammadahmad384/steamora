@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { trackConversion, COMPANY_INFO } from '../../data/config';
 import { MELBOURNE_SUBURBS } from '../../data/suburbsData';
 import { CheckCircle2, Calculator, ArrowRight, ShieldCheck, Sparkles, Mail, Phone } from 'lucide-react';
@@ -35,6 +35,7 @@ export default function QuoteCalculator({
   const [customSuburb, setCustomSuburb] = useState('');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const submittingRef = useRef(false);
   const [sendError, setSendError] = useState('');
   const [isEmailDispatched, setIsEmailDispatched] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -96,7 +97,8 @@ export default function QuoteCalculator({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSending || !validate()) return;
+    if (submittingRef.current || !validate()) return;
+    submittingRef.current = true;
     setIsSending(true);
     setSendError('');
 
@@ -123,6 +125,7 @@ export default function QuoteCalculator({
     });
     if (!result.success) {
       setSendError('We could not confirm delivery. Please try again, or contact us by phone or WhatsApp.');
+      submittingRef.current = false;
       setIsSending(false);
 
       return;
@@ -137,11 +140,12 @@ export default function QuoteCalculator({
       estimatedPrice: `${estimatedPriceMin} - ${estimatedPriceMax}`,
       details: `Rooms: ${formData.roomsCount}, Property: ${formData.propertyType}, Stains: ${formData.hasStains ? 'Yes' : 'No'}, Pet Odour: ${formData.hasPetOdour ? 'Yes' : 'No'}${formData.message ? ` | Notes: ${formData.message}` : ''}`
     });
+    submittingRef.current = false;
     setIsSending(false);
     setIsEmailDispatched(true);
     trackConversion(
       'quote_form_submit',
-      `Free Quote: ${formData.fullName} - ${formData.service} (${resolvedSuburb})`,
+      `Free Quote - ${formData.service}`,
       estimatedPriceMin
     );
 
@@ -257,7 +261,7 @@ export default function QuoteCalculator({
             </a>
             <a
               href={getQuoteMailtoUrl()}
-              onClick={() => trackConversion('quote_form_submit', 'Quote Confirmation Email Click')}
+              onClick={() => trackConversion('email_click', 'Quote Confirmation Email Click')}
               className="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-slate-900/10 transition-all hover:scale-[1.02]"
             >
               <Mail className="w-4 h-4 text-teal-400" />
